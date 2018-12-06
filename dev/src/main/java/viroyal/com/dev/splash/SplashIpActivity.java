@@ -55,7 +55,7 @@ public abstract class SplashIpActivity extends MonitorActivity {
                     @Override
                     public void call(Boolean granted) {
                         if (granted) {
-                            getApi(SplashIpActivity.this);
+                            getMacApi(SplashIpActivity.this);
                         } else {
                             Slog.d(TAG, "uploadFile  [id, filepath, pkgName, action]:");
                         }

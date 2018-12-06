@@ -22,7 +22,6 @@ import java.util.Date;
 /**
  * Created by Jeremy on 2018/6/14.
  */
-
 public abstract class MonitorActivity extends SlothActivity {
 
     public static final String BROADCAST_ACTION = "com.viroyal.permission.capture_complete";
@@ -131,11 +130,6 @@ public abstract class MonitorActivity extends SlothActivity {
         super.onPause();
     }
 
-    @Override
-    public void handleToast(int code, String msg) {
-        showToast(msg);
-    }
-
 
     class MyBroadcastReceiver extends BroadcastReceiver {
 
@@ -179,4 +173,10 @@ public abstract class MonitorActivity extends SlothActivity {
             unregisterReceiver(this);
         }
     }
+
+    @Override
+    public void handleToast(int code, String msg) {
+        showToast(msg);
+    }
+
 }

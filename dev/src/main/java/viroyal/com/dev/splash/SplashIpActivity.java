@@ -39,14 +39,14 @@ public abstract class SplashIpActivity extends MonitorActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        ConfigDevice.school_id = SPUtils.getInstance(this).get("school_id","");
+        ConfigDevice.operator = SPUtils.getInstance(this).get("operator","");
         alertDialog = new AlertDialog.Builder(this)
                 .setTitle("配置加载")
                 .setCancelable(false)
                 .setMessage("正在加载配置信息...")
                 .create();
         alertDialog.show();
-
         RxPermissions.getInstance(this).request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 ACCESS_FINE_LOCATION,

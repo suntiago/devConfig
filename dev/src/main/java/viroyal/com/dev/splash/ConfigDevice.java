@@ -40,8 +40,8 @@ public class ConfigDevice {
         return MacUtil.getLocalMacAddressFromIp();
     }
 
-    public void setGetapiUrl(String url){
-        this.GETAPI_URL_MCPAPI = url;
+    public static void setGetapiUrl(String url){
+        GETAPI_URL_MCPAPI = url;
     }
 
     //配置ip地址

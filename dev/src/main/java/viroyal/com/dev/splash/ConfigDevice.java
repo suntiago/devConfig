@@ -26,7 +26,7 @@ import rx.schedulers.Schedulers;
 
 public class ConfigDevice {
     private final static String TAG = "ConfigDevice";
-    private static String GETAPI_URL_MCPAPI = "https://mcpapi.iyuyun.net:18443";
+    private static String GETAPI_URL_MCPAPI = "";
     public static String school_id = "";
     public static String operator = "";
 
@@ -38,6 +38,10 @@ public class ConfigDevice {
     //获取设备ip地址
     public static String getDeviceId() {
         return MacUtil.getLocalMacAddressFromIp();
+    }
+
+    public void setGetapiUrl(String url){
+        this.GETAPI_URL_MCPAPI = url;
     }
 
     //配置ip地址

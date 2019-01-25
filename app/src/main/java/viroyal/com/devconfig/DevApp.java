@@ -2,6 +2,7 @@ package viroyal.com.devconfig;
 
 import android.app.Application;
 
+import com.suntiago.baseui.utils.file.StorageManagerHelper;
 import com.suntiago.baseui.utils.log.CrashHandler;
 import com.suntiago.baseui.utils.log.Slog;
 
@@ -10,12 +11,15 @@ import com.suntiago.baseui.utils.log.Slog;
  */
 
 public class DevApp extends Application {
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Slog.init(this, "suntiago", "com.suntiago.demo");
-        Slog.enableSaveLog(true);
-        CrashHandler crashHandler = CrashHandler.getInstance();
-        crashHandler.init(getApplicationContext(), "suntiago", "com.suntiago.demo");
-    }
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    Slog.setDebug(true, true);
+    Slog.enableSaveLog(true);
+    Slog.init(this);
+    StorageManagerHelper.getStorageHelper().initPath("suntiago", "devconfig");
+
+    CrashHandler crashHandler = CrashHandler.getInstance();
+    crashHandler.init(getApplicationContext());
+  }
 }

@@ -1,18 +1,12 @@
 package viroyal.com.dev;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
-import android.os.storage.StorageManager;
 
-import com.suntiago.baseui.BuildConfig;
 import com.suntiago.baseui.utils.log.Slog;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class CommandBroadcastReceiver extends BroadcastReceiver {
@@ -42,11 +36,6 @@ public class CommandBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    private String sPath;
-    private static String LOG_PATH = "/viroyal/" + BuildConfig.APPLICATION_ID + "/";// 日志文件在sdcard中的路径
-    private static String LOG_FILE_FIRST_NAME = BuildConfig.APPLICATION_ID + "_";
-    private final static String LOG_FILE_END_NAME = "_log.txt";
-
     private void updatelog(Context context) {
         Slog.d(TAG, "updatelog:path:"
                 + " id:" + mLogId + " pkgName:" + context.getPackageName());
@@ -58,52 +47,6 @@ public class CommandBroadcastReceiver extends BroadcastReceiver {
             intent.putExtra("pkgName", context.getPackageName());
             intent.putExtra("id", mLogId);
             context.sendBroadcast(intent);
-        }
-    }
-
-    public String getSavePath(Context context) {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            sPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        } else {
-            if (context != null) {
-                StorageList storageList = new StorageList(context);
-                sPath = storageList.getVolumePaths()[1];
-            }
-        }
-        return sPath + LOG_PATH;
-    }
-
-    public static class StorageList {
-        private Context mContext;
-        private StorageManager mStorageManager;
-        private Method mMethodGetPaths;
-
-        public StorageList(Context context) {
-            mContext = context;
-            if (mContext != null) {
-                mStorageManager = (StorageManager) mContext
-                        .getSystemService(Activity.STORAGE_SERVICE);
-                try {
-                    mMethodGetPaths = mStorageManager.getClass()
-                            .getMethod("getVolumePaths");
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        public String[] getVolumePaths() {
-            String[] paths = null;
-            try {
-                paths = (String[]) mMethodGetPaths.invoke(mStorageManager);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
-            return paths;
         }
     }
 

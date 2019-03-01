@@ -2,13 +2,14 @@
           package="viroyal.com.devconfig">
 
     <!-- 获取网络访问的权限 -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- 获取网络状态 -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <!-- 获取内存读写权限 -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
     <application
         android:name=".DevApp"
         android:allowBackup="true"
@@ -24,5 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <receiver android:name="viroyal.com.dev.CommandBroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.viroyal.permission.getlog"/>
+                <action android:name="com.viroyal.permission.restart"/>
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

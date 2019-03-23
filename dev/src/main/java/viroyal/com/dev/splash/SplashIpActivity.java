@@ -23,17 +23,22 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.functions.Action1;
-import viroyal.com.dev.MonitorBaseActivity;
+import viroyal.com.dev.NFCMonitorBaseActivity;
 
 /**
  * Created by Jeremy on 2018/8/2.
  */
 
-public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IModel> extends MonitorBaseActivity<T, D> {
+public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IModel> extends NFCMonitorBaseActivity<T, D> {
 
   //正在加载弹出框
   private AlertDialog alertDialog;
   int mAPITime = 1000 * 10;
+
+
+  protected NFCSwitch NFCSwitch() {
+    return NFCSwitch.STANDARD;
+  }
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {

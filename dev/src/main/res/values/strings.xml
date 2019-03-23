@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">dev</string>
+    <string name="please_turn_on_the_permission_of_nfc">请打开NFC权限</string>
 </resources>

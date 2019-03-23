@@ -34,6 +34,8 @@ public abstract class MonitorBaseActivity<T extends AppDelegateBase, D extends I
   MyBroadcastReceiver mMyBroadcastReceiver = new MyBroadcastReceiver();
   CrashBroadcastReceiver mCrashBroadcastReceiver = new CrashBroadcastReceiver();
 
+  protected boolean activityIsResume = false;
+
   //截图
   private void capture() {
     viewSaveToImage(getRootView());
@@ -106,6 +108,8 @@ public abstract class MonitorBaseActivity<T extends AppDelegateBase, D extends I
   @Override
   protected void onResume() {
     super.onResume();
+    activityIsResume = true;
+
     mMyBroadcastReceiver.register(this);
     mCrashBroadcastReceiver.register(this);
   }
@@ -115,6 +119,7 @@ public abstract class MonitorBaseActivity<T extends AppDelegateBase, D extends I
     mMyBroadcastReceiver.unRegister(this);
     mCrashBroadcastReceiver.unRegister(this);
     super.onPause();
+    activityIsResume = false;
   }
 
   class MyBroadcastReceiver extends BroadcastReceiver {

@@ -11,9 +11,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.suntiago.baseui.R;
 import com.suntiago.baseui.utils.DensityUtil;
 import com.suntiago.baseui.utils.log.Slog;
+
+import viroyal.com.dev.R;
 
 /**
  * Created by zy on 2019/1/29.

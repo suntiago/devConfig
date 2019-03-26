@@ -9,7 +9,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.suntiago.baseui.R;
 import com.suntiago.baseui.utils.log.Slog;
 import com.suntiago.network.network.download.DataChanger;
 import com.suntiago.network.network.download.DataWatcher;
@@ -22,6 +21,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import viroyal.com.dev.R;
 
 
 /**

@@ -21,8 +21,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.suntiago.baseui.R;
 import com.suntiago.baseui.utils.log.Slog;
+
+import viroyal.com.dev.R;
 
 
 /**

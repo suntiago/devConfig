@@ -8,10 +8,11 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.suntiago.baseui.R;
 import com.suntiago.baseui.utils.log.Slog;
 
 import java.io.IOException;
+
+import viroyal.com.dev.R;
 
 
 /**

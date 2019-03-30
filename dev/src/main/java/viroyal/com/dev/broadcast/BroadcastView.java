@@ -86,15 +86,27 @@ public class BroadcastView extends FrameLayout {
     }
   }
 
+  ItemClickCallback mItemClickCallback;
+
   /*点击事件*/
-  public void onclick() {
+  public void setonClickCallback(ItemClickCallback itemClickCallback) {
+    mItemClickCallback = itemClickCallback;
   }
 
-  /**
-   * 加载进度
-   */
-  public void onLoadPregress() {
+  volatile boolean allLoaded = false;
 
+  /**
+   * 是否全部加载
+   */
+  public boolean idAllLoaded() {
+    return allLoaded;
+  }
+
+  volatile int loadAmount = 0;
+
+  //已经加载的数量
+  public int loadedAmount() {
+    return loadAmount;
   }
 
   /**
@@ -143,12 +155,34 @@ public class BroadcastView extends FrameLayout {
             }
           }
         }
+        List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+            "contentGappercent = " + mIndexID + "");
+        boolean tagallLoad = true;
+        int amount = 0;
+        if (list != null && list.size() > 0) {
+          for (BroadcastData broadcastData : list) {
+            if (broadcastData.isMieda() && TextUtils.isEmpty(broadcastData.image_url_path)) {
+              tagallLoad = false;
+            }
+            if (!broadcastData.isMieda()) {
+              amount++;
+            } else if (broadcastData.isMieda() && !TextUtils.isEmpty(broadcastData.image_url_path)) {
+              amount++;
+            }
+          }
+        }
+        loadAmount = amount;
+        allLoaded = tagallLoad;
+
       }
     };
     bindDownload();
   }
 
-  public void refreshData(List<BroadcastData> dataList) {
+  /**
+   * 预加载数据
+   */
+  public boolean refreshDataPreLoad(List<BroadcastData> dataList) {
     Slog.d(TAG, "refreshData  [dataList]:");
     if (dataList == null) {
       dataList = new ArrayList<>();
@@ -205,10 +239,14 @@ public class BroadcastView extends FrameLayout {
         }
       }
     }
-
     //3 检查本地是否有文件需要下载
     checkDownload();
+    return needRefresh;
+  }
 
+  /*加载数据，并渲染界面*/
+  public void refreshData(List<BroadcastData> dataList) {
+    boolean needRefresh = refreshDataPreLoad(dataList);
     if (broadcastDataCurrent == null) {
       needRefresh = true;
     }
@@ -217,7 +255,6 @@ public class BroadcastView extends FrameLayout {
       playNextMedia();
     }
   }
-
 
   private void modifyCurrent(BroadcastData broadcastDatanew) {
     broadcastDataCurrent = broadcastDatanew;
@@ -396,6 +433,16 @@ public class BroadcastView extends FrameLayout {
       if (view == null) {
         return;
       }
+      view.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          Slog.d(TAG, "onClick  [v]:" + v.toString());
+          if (mItemClickCallback != null) {
+            mItemClickCallback.onclickItem(broadcastDataCurrent,
+                (BroadcastViewItem) v.getTag(R.id.tag_first));
+          }
+        }
+      });
       if (broadcastDataCurrent.isVideo()) {
         tagVideoPlaying = true;
         mHandler.removeMessages(MSG_PLAY_NEXT);
@@ -506,13 +553,16 @@ public class BroadcastView extends FrameLayout {
   private void checkDownload() {
     List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
         "contentGappercent = " + mIndexID + "");
+    boolean tagneedTodown = false;
     if (list != null && list.size() > 0) {
       for (BroadcastData media : list) {
         if (media.isMieda() && TextUtils.isEmpty(media.image_url_path)) {
           startDownload(media.image_url);
+          tagneedTodown = true;
         }
       }
     }
+    allLoaded = !tagneedTodown;
   }
 
   DataWatcher mDataWatcher = null;
@@ -544,5 +594,9 @@ public class BroadcastView extends FrameLayout {
         playNextMedia();
         break;
     }
+  }
+
+  public interface ItemClickCallback {
+    void onclickItem(BroadcastData data, BroadcastViewItem item);
   }
 }

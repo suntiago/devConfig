@@ -24,4 +24,7 @@ public interface BroadcastViewItem<T> {
   void destoryView();
 
   void setBroadcastProgress(BroadcastProgress progress);
+
+
+  void switchPlayingStatus(boolean playing);
 }

@@ -70,18 +70,35 @@ public class BroadcastView extends FrameLayout {
     aBroadcastView(context);
   }
 
+  boolean activityResume = false;
+
   /*activity 状态变化，内容状态也会跟着变化*/
   public void activityResume(boolean resume) {
-    if (resume && broadcastDataCurrent != null) {
+    activityResume = resume;
+    switchPlayStatus();
+  }
+
+  void switchPlayStatus() {
+    if (broadcastDataCurrent != null) {
       View view = getBView(broadcastDataCurrent);
       if (view == null) {
         return;
       }
       BroadcastViewItem viewItem = (BroadcastViewItem) view.getTag(R.id.tag_first);
       if (viewItem != null) {
-        viewItem.bindView(broadcastDataCurrent);
-        viewItem.start();
-        viewItem.resume();
+        if (enablePlaying) {
+          viewItem.switchPlayingStatus(true);
+          if (activityResume) {
+            viewItem.bindView(broadcastDataCurrent);
+            viewItem.start();
+            viewItem.resume();
+          } else {
+            viewItem.pause();
+            viewItem.stop();
+          }
+        } else {
+          viewItem.switchPlayingStatus(false);
+        }
       }
     }
   }
@@ -107,6 +124,18 @@ public class BroadcastView extends FrameLayout {
   //已经加载的数量
   public int loadedAmount() {
     return loadAmount;
+  }
+
+  volatile boolean enablePlaying = true;
+
+  public void startPlay() {
+    enablePlaying = true;
+    switchPlayStatus();
+  }
+
+  public void stopPlay() {
+    enablePlaying = false;
+    switchPlayStatus();
   }
 
   /**
@@ -383,6 +412,10 @@ public class BroadcastView extends FrameLayout {
 
   private synchronized void playNextMedia() {
     Slog.d(TAG, "playNextMedia  []:20190321-1");
+    if (!enablePlaying) {
+      Slog.d(TAG, "playNextMedia  []: now enablePlaying is false, stop playing !!!");
+      return;
+    }
     //查找置顶的播放media
     BroadcastData broadcastDatanew = null;
 

@@ -38,6 +38,9 @@ public class BroadcastUrl implements BroadcastViewItem<BroadcastData> {
   Context mContext;
   WifiReceiver wifiReceiver;
 
+  //播放状态，默认开启
+  boolean playingStatus = true;
+
   public BroadcastUrl(Context context) {
     mContext = context;
   }
@@ -201,6 +204,14 @@ public class BroadcastUrl implements BroadcastViewItem<BroadcastData> {
   @Override
   public void setBroadcastProgress(BroadcastProgress progress) {
 
+  }
+
+  @Override
+  public void switchPlayingStatus(boolean playing) {
+    if (playingStatus == playing) {
+      return;
+    }
+    playingStatus = playing;
   }
 
   class WifiReceiver extends BroadcastReceiver {

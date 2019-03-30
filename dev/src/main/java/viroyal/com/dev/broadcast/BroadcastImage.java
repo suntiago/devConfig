@@ -32,6 +32,9 @@ public class BroadcastImage implements BroadcastViewItem<BroadcastData> {
   View view;
   boolean isDestory = false;
 
+  //播放状态，默认开启
+  boolean playingStatus = true;
+
   public BroadcastImage(Context context) {
     mContext = context;
   }
@@ -115,7 +118,7 @@ public class BroadcastImage implements BroadcastViewItem<BroadcastData> {
   @Override
   public void stop() {
     Slog.d(TAG, "stop  []:");
-    view.setVisibility(View.INVISIBLE);
+    view.setVisibility(View.GONE);
   }
 
   @Override
@@ -127,6 +130,13 @@ public class BroadcastImage implements BroadcastViewItem<BroadcastData> {
   @Override
   public void setBroadcastProgress(BroadcastProgress progress) {
 
+  }
+
+  @Override
+  public void switchPlayingStatus(boolean playing) {
+    if (playingStatus == playing) {
+      return;
+    }
   }
 
   public void showdefault() {

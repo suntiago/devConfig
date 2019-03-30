@@ -31,6 +31,9 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
   BroadcastProgress mBroadcastProgress;
   BroadcastData mcBroadcastData = null;
 
+  //播放状态，默认开启
+  boolean playingStatus = true;
+
   public BroadcastVideo(Context context) {
     Slog.d(TAG, "BroadcastVideo  [context]:");
     mContext = context;
@@ -96,13 +99,14 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
   @Override
   public void start() {
     Slog.d(TAG, "start  []:");
+
     mSurfaceView.setVisibility(View.VISIBLE);
   }
 
   @Override
   public void resume() {
     Slog.d(TAG, "resume  []:");
-    if (tagSurfaceHolderCreated) {
+    if (tagSurfaceHolderCreated && playingStatus) {
       play(currentPosition);
     }
   }
@@ -110,14 +114,13 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
   @Override
   public void pause() {
     Slog.d(TAG, "pause  []:");
-    mSurfaceView.setVisibility(View.INVISIBLE);
     stopPlay();
   }
 
   @Override
   public void stop() {
     Slog.d(TAG, "stop  []:");
-
+    mSurfaceView.setVisibility(View.INVISIBLE);
   }
 
   @Override
@@ -129,6 +132,16 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
   @Override
   public void setBroadcastProgress(BroadcastProgress progress) {
     mBroadcastProgress = progress;
+  }
+
+  @Override
+  public void switchPlayingStatus(boolean playing) {
+    if (playingStatus == playing) {
+      return;
+    }
+    if (!playingStatus) {
+      pause();
+    }
   }
 
   private void play(final int msec) {
@@ -150,8 +163,8 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mp) {
-          mediaPlayer.start();
-          mediaPlayer.seekTo(msec);
+        mediaPlayer.start();
+        mediaPlayer.seekTo(msec);
       }
     });
     mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {

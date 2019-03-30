@@ -100,6 +100,10 @@ public class BroadcastView extends FrameLayout {
           viewItem.switchPlayingStatus(false);
         }
       }
+    } else {
+      if (enablePlaying && activityResume) {
+        playNextMedia();
+      }
     }
   }
 
@@ -270,12 +274,14 @@ public class BroadcastView extends FrameLayout {
     }
     //3 检查本地是否有文件需要下载
     checkDownload();
+    enablePlaying = false;
     return needRefresh;
   }
 
   /*加载数据，并渲染界面*/
   public void refreshData(List<BroadcastData> dataList) {
     boolean needRefresh = refreshDataPreLoad(dataList);
+    enablePlaying = true;
     if (broadcastDataCurrent == null) {
       needRefresh = true;
     }

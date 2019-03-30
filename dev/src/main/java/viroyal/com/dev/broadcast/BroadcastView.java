@@ -356,7 +356,7 @@ public class BroadcastView extends FrameLayout {
 
     //第一步，优先查找top
     List<BroadcastData> tops = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
-        "top=1" + "AND " + "contentGappercent = " + mIndexID + "");
+        "top=1" + " AND " + "contentGappercent = " + mIndexID + "");
     broadcastDatanew = findnextMedia(tops, currentPlayId);
 
     //如果top里面没有找到，查找所有的

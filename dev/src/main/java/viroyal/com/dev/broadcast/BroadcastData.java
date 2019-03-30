@@ -79,6 +79,7 @@ public class BroadcastData {
   //视频缩略图
   public String thumb_url;
 
+  /*轮播数据的类型，应对不同的使用情况， 暂时使用这个字段*/
   //视频缩略图本地下载地址
   public String thumb_url_path;
 
@@ -95,7 +96,10 @@ public class BroadcastData {
   public String end_time;// "09:19:00"
 
   public int maxwidthpercent;
-  public int contentGappercent;
+
+
+  @Property(column = "contentGappercent")
+  public int index_id = 0;
 
   public void updata(BroadcastData media) {
     this.top = media.top;

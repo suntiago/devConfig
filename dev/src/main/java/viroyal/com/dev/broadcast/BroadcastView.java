@@ -52,6 +52,8 @@ public class BroadcastView extends FrameLayout {
   BroadcastImage mBroadcastImage;
   BroadcastVideo mBroadcastVideo;
   BroadcastUrl mBroadcastUrl;
+  //区分不同的index
+  int mIndexID = 0;
 
   public BroadcastView(Context context) {
     super(context);
@@ -84,6 +86,24 @@ public class BroadcastView extends FrameLayout {
     }
   }
 
+  /*点击事件*/
+  public void onclick() {
+  }
+
+  /**
+   * 加载进度
+   */
+  public void onLoadPregress() {
+
+  }
+
+  /**
+   * 设置index,区分一个项目里面多出使用
+   */
+  public void setbroadcastIndex(int index) {
+    mIndexID = index;
+  }
+
   public void destory() {
     if (broadcastDataCurrent != null) {
       View view = onlyGetBView(broadcastDataCurrent);
@@ -111,7 +131,7 @@ public class BroadcastView extends FrameLayout {
         Slog.d(TAG, "onDataChanged  [data]:" + "正在下载" + data.percent + "%");
         if (data.percent == 100 && !TextUtils.isEmpty(data.loc_path)) {
           List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
-              "image_url = \"" + data.url + "\"");
+              "image_url = \"" + data.url + "\"" + " AND contentGappercent = " + mIndexID + "");
           if (list != null && list.size() > 0) {
             for (BroadcastData media : list) {
               media.image_url_path = data.loc_path;
@@ -134,9 +154,13 @@ public class BroadcastView extends FrameLayout {
       dataList = new ArrayList<>();
       Slog.e(TAG, "refreshData: dataList is null");
     }
+    for (BroadcastData broadcastData : dataList) {
+      broadcastData.index_id = mIndexID;
+    }
     boolean needRefresh = false;
     //1 删除缺少的数据
-    List<BroadcastData> dbOlds = KJDB.getDefaultInstance().findAll(BroadcastData.class);
+    List<BroadcastData> dbOlds = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+        "contentGappercent = " + mIndexID + "");
     if (dbOlds != null && dbOlds.size() > 0) {
       for (BroadcastData dbOld : dbOlds) {
         boolean deleted = true;
@@ -332,12 +356,13 @@ public class BroadcastView extends FrameLayout {
 
     //第一步，优先查找top
     List<BroadcastData> tops = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
-        "top=1");
+        "top=1" + "AND " + "contentGappercent = " + mIndexID + "");
     broadcastDatanew = findnextMedia(tops, currentPlayId);
 
     //如果top里面没有找到，查找所有的
     if (broadcastDatanew == null) {
-      List<BroadcastData> list = KJDB.getDefaultInstance().findAll(BroadcastData.class);
+      List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+          "contentGappercent = " + mIndexID + "");
       broadcastDatanew = findnextMedia(list, currentPlayId);
     }
 
@@ -479,7 +504,8 @@ public class BroadcastView extends FrameLayout {
   }
 
   private void checkDownload() {
-    List<BroadcastData> list = KJDB.getDefaultInstance().findAll(BroadcastData.class);
+    List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+        "contentGappercent = " + mIndexID + "");
     if (list != null && list.size() > 0) {
       for (BroadcastData media : list) {
         if (media.isMieda() && TextUtils.isEmpty(media.image_url_path)) {

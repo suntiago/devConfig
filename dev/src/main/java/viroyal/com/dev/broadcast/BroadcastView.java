@@ -24,7 +24,6 @@ import java.util.List;
 
 import viroyal.com.dev.R;
 
-
 /**
  * Created by zy on 2019/1/29.
  * <p>
@@ -33,7 +32,6 @@ import viroyal.com.dev.R;
  * destory  需要调用，销毁资源
  * refreshData 更新界面数据
  */
-
 public class BroadcastView extends FrameLayout {
   private final String TAG = getClass().getSimpleName();
   final static int MSG_PLAY_NEXT = 100001;
@@ -149,6 +147,9 @@ public class BroadcastView extends FrameLayout {
    */
   public void setbroadcastIndex(int index) {
     mIndexID = index;
+    List<BroadcastData> dbOlds = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+        "contentGappercent = " + mIndexID + "");
+    refreshDataPreLoad(dbOlds);
   }
 
   public void destory() {

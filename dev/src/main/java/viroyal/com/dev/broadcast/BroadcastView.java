@@ -120,6 +120,7 @@ public class BroadcastView extends FrameLayout {
    * 是否全部加载
    */
   public boolean idAllLoaded() {
+    refreshLoadAmount();
     return allLoaded;
   }
 
@@ -127,6 +128,7 @@ public class BroadcastView extends FrameLayout {
 
   //已经加载的数量
   public int loadedAmount() {
+    refreshLoadAmount();
     return loadAmount;
   }
 
@@ -188,28 +190,30 @@ public class BroadcastView extends FrameLayout {
             }
           }
         }
-        List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
-            "contentGappercent = " + mIndexID + "");
-        boolean tagallLoad = true;
-        int amount = 0;
-        if (list != null && list.size() > 0) {
-          for (BroadcastData broadcastData : list) {
-            if (broadcastData.isMieda() && TextUtils.isEmpty(broadcastData.image_url_path)) {
-              tagallLoad = false;
-            }
-            if (!broadcastData.isMieda()) {
-              amount++;
-            } else if (broadcastData.isMieda() && !TextUtils.isEmpty(broadcastData.image_url_path)) {
-              amount++;
-            }
-          }
-        }
-        loadAmount = amount;
-        allLoaded = tagallLoad;
-
       }
     };
     bindDownload();
+  }
+
+  private void refreshLoadAmount() {
+    List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+        "contentGappercent = " + mIndexID + "");
+    boolean tagallLoad = true;
+    int amount = 0;
+    if (list != null && list.size() > 0) {
+      for (BroadcastData broadcastData : list) {
+        if (broadcastData.isMieda() && TextUtils.isEmpty(broadcastData.image_url_path)) {
+          tagallLoad = false;
+        }
+        if (!broadcastData.isMieda()) {
+          amount++;
+        } else if (broadcastData.isMieda() && !TextUtils.isEmpty(broadcastData.image_url_path)) {
+          amount++;
+        }
+      }
+    }
+    loadAmount = amount;
+    allLoaded = tagallLoad;
   }
 
   /**
@@ -410,6 +414,27 @@ public class BroadcastView extends FrameLayout {
   private boolean checkmediaToplay(BroadcastData media) {
     if (!media.isMieda() || !TextUtils.isEmpty(media.image_url_path)) {
       if (checkDateAndTimeIn(media.id, media.start_time, media.end_time, media.start_date, media.end_date)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  //检测当前是否有可以播放的内容
+  public boolean checkHaveMediaToPlay() {
+    //第一步，优先查找top
+    List<BroadcastData> bs = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+        "contentGappercent = " + mIndexID + "");
+    if (bs == null || bs.size() == 0) {
+      return false;
+    }
+    //
+    if (loadedAmount() == 0) {
+      return false;
+    }
+    for (BroadcastData b : bs) {
+      if (checkmediaToplay(b)) {
         return true;
       }
     }

@@ -163,6 +163,7 @@ public class BroadcastView extends FrameLayout {
         viewItem.destoryView();
       }
     }
+    mHandler.removeMessages(MSG_PLAY_NEXT);
   }
 
   private void aBroadcastView(Context context) {

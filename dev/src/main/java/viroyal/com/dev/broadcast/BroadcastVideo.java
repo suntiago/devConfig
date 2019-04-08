@@ -126,7 +126,9 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
   @Override
   public void destoryView() {
     Slog.d(TAG, "destoryView  []:");
-
+    if (mediaPlayer != null) {
+      mediaPlayer.release();
+    }
   }
 
   @Override

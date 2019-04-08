@@ -35,11 +35,6 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
   private AlertDialog alertDialog;
   int mAPITime = 1000 * 10;
 
-
-  protected NFCSwitch NFCSwitch() {
-    return NFCSwitch.STANDARD;
-  }
-
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);

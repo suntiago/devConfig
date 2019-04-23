@@ -149,7 +149,7 @@ public class BroadcastView extends FrameLayout {
     mIndexID = index;
     List<BroadcastData> dbOlds = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
         "contentGappercent = " + mIndexID + "");
-    refreshDataPreLoad(dbOlds);
+    refreshDataPreLoad_(dbOlds);
   }
 
   public void destory() {
@@ -237,18 +237,10 @@ public class BroadcastView extends FrameLayout {
     allLoaded = tagallLoad;
   }
 
-  /**
-   * 预加载数据
-   */
-  public boolean refreshDataPreLoad(List<BroadcastData> dataList) {
+  private boolean refreshDataPreLoad_(List<BroadcastData> dataList) {
     Slog.d(TAG, "refreshData  [dataList]:");
     if (dataList == null) {
       dataList = new ArrayList<>();
-      Slog.e(TAG, "refreshData: dataList is null");
-    }
-    for (BroadcastData broadcastData : dataList) {
-      broadcastData.index_id = mIndexID;
-      broadcastData.id = broadcastData.id + mIndexID * 10000000;
     }
     boolean needRefresh = false;
     //1 删除缺少的数据
@@ -256,24 +248,25 @@ public class BroadcastView extends FrameLayout {
         "contentGappercent = " + mIndexID + "");
 
     if (dbOlds != null && dbOlds.size() > 0) {
-      boolean deleted = true;
-
       for (BroadcastData dbOld : dbOlds) {
+        boolean deleted = true;
         for (BroadcastData media : dataList) {
           //如果在返回的数据里面没有找到，则认为已经删除， id相同，url相同
-          if (media.equals(dbOld)) {
-            deleted = false;
-            break;
-          } else {
-            if (media.id == dbOld.id &&
-                media.isMieda() &&
-                !TextUtils.isEmpty(dbOld.image_url_path) &&
-                dbOld.image_url.equals(media.image_url)) {
-              media.image_url_path = dbOld.image_url_path;
-              KJDB.getDefaultInstance().update(media);
+
+          if (media.id == dbOld.id) {
+            if (media.equals(dbOld)) {
               deleted = false;
-              break;
+            } else {
+              if (media.id == dbOld.id &&
+                  media.isMieda() &&
+                  !TextUtils.isEmpty(dbOld.image_url_path) &&
+                  dbOld.image_url.equals(media.image_url)) {
+                media.image_url_path = dbOld.image_url_path;
+                KJDB.getDefaultInstance().update(media);
+                deleted = false;
+              }
             }
+            break;
           }
         }
         if (deleted) {
@@ -312,6 +305,21 @@ public class BroadcastView extends FrameLayout {
     checkDownload();
     enablePlaying = false;
     return needRefresh;
+  }
+
+  /**
+   * 预加载数据
+   */
+  public boolean refreshDataPreLoad(List<BroadcastData> dataList) {
+    if (dataList == null) {
+      dataList = new ArrayList<>();
+      Slog.e(TAG, "refreshData: dataList is null");
+    }
+    for (BroadcastData broadcastData : dataList) {
+      broadcastData.index_id = mIndexID;
+      broadcastData.id = broadcastData.id + mIndexID * 10000000;
+    }
+    return refreshDataPreLoad_(dataList);
   }
 
   /*加载数据，并渲染界面*/

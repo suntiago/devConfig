@@ -153,7 +153,7 @@ public class BroadcastView extends FrameLayout {
   }
 
   public void destory() {
-    if (broadcastDataCurrent != null) {
+    /*if (broadcastDataCurrent != null) {
       View view = onlyGetBView(broadcastDataCurrent);
       if (view == null) {
         return;
@@ -162,7 +162,22 @@ public class BroadcastView extends FrameLayout {
       if (viewItem != null) {
         viewItem.destoryView();
       }
+    }*/
+
+    int count = getChildCount();
+    for (int i = 0; i < count; i++) {
+      View v = getChildAt(i);
+      BroadcastViewItem viewItem = (BroadcastViewItem) v.getTag(R.id.tag_first);
+      if (viewItem != null) {
+        viewItem.pause();
+        viewItem.stop();
+        viewItem.destoryView();
+      } else {
+        Slog.d(TAG, "playNextMedia  []:BroadcastViewItem tag null");
+      }
     }
+
+    broadcastDataCurrent = null;
     mHandler.removeMessages(MSG_PLAY_NEXT);
   }
 
@@ -229,6 +244,7 @@ public class BroadcastView extends FrameLayout {
     }
     for (BroadcastData broadcastData : dataList) {
       broadcastData.index_id = mIndexID;
+      broadcastData.id = broadcastData.id + mIndexID * 1000000;
     }
     boolean needRefresh = false;
     //1 删除缺少的数据
@@ -472,8 +488,7 @@ public class BroadcastView extends FrameLayout {
     if (broadcastDatanew != null) {
       //判断是否是当前正在播放的内容
       if (broadcastDataCurrent != null) {
-        if (broadcastDatanew.id == broadcastDataCurrent.id
-            && broadcastDatanew.image_url.equals(broadcastDataCurrent.image_url)) {
+        if (broadcastDatanew.equals(broadcastDataCurrent)) {
           Slog.d(TAG, "playNextMedia  []: is playing current media, skip");
           if (!broadcastDatanew.isVideo()) {
             mHandler.sendEmptyMessageDelayed(MSG_PLAY_NEXT, broadcastDataCurrent.duration * 1000);

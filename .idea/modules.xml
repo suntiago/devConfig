@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dev/dev.iml" filepath="$PROJECT_DIR$/.idea/modules/dev/dev.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/devConfig.iml" filepath="$PROJECT_DIR$/.idea/devConfig.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev/dev.iml" filepath="$PROJECT_DIR$/dev/dev.iml" />
+      <module fileurl="file://$PROJECT_DIR$/devConfig.iml" filepath="$PROJECT_DIR$/devConfig.iml" />
     </modules>
   </component>
 </project>

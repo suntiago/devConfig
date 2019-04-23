@@ -3,6 +3,7 @@ package viroyal.com.dev.broadcast;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.text.TextUtils;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -147,6 +148,10 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
   }
 
   private void play(final int msec) {
+    if (TextUtils.isEmpty(mcBroadcastData.image_url_path)) {
+      return;
+    }
+
     currentPosition = 0;
     String path = mcBroadcastData.image_url_path;
     if (mediaPlayer == null) {
@@ -160,8 +165,13 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    mediaPlayer.setDisplay(surfaceHolder);
-    mediaPlayer.prepareAsync();
+    try {
+      //这里可能由于某种原因异常
+      mediaPlayer.setDisplay(surfaceHolder);
+      mediaPlayer.prepareAsync();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mp) {

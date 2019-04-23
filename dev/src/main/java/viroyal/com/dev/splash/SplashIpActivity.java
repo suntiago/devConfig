@@ -96,7 +96,7 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
               @Override
               public void run() {
                 Slog.d(TAG, "run []:");
-                alertDialog.setMessage(r.error_msg + ",mac:" + ConfigDevice.getDeviceId(context));
+                alertDialog.setMessage(""+r.error_code+":"+r.error_msg + "\nmac:" + ConfigDevice.getDeviceId(context));
               }
             });
             Observable.timer(mAPITime, TimeUnit.MILLISECONDS).subscribe(new Action1<Long>() {
@@ -119,7 +119,8 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
     File file = new File(path);
     if (!file.exists()) {
       try {
-        FileWriter filerWriter = new FileWriter(file, false);//后面这个参数代表是不是要接上文件中原来的数据，不进行覆盖
+        //后面这个参数代表是不是要接上文件中原来的数据，不进行覆盖
+        FileWriter filerWriter = new FileWriter(file, false);
         BufferedWriter bufWriter = new BufferedWriter(filerWriter);
         bufWriter.write(ConfigDevice.getDeviceId());
         bufWriter.close();

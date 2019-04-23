@@ -176,6 +176,10 @@ public class BroadcastView extends FrameLayout {
         Slog.d(TAG, "playNextMedia  []:BroadcastViewItem tag null");
       }
     }
+    if (mDataWatcher != null) {
+      DownloadManager.getInstance(mContext).removeObserver(mDataWatcher);
+      mDataWatcher = null;
+    }
 
     broadcastDataCurrent = null;
     mHandler.removeMessages(MSG_PLAY_NEXT);
@@ -244,7 +248,7 @@ public class BroadcastView extends FrameLayout {
     }
     for (BroadcastData broadcastData : dataList) {
       broadcastData.index_id = mIndexID;
-      broadcastData.id = broadcastData.id + mIndexID * 1000000;
+      broadcastData.id = broadcastData.id + mIndexID * 10000000;
     }
     boolean needRefresh = false;
     //1 删除缺少的数据
@@ -273,9 +277,16 @@ public class BroadcastView extends FrameLayout {
           KJDB.getDefaultInstance().delete(dbOld);
           try {
             if (null != dbOld.image_url_path && !"".equals(dbOld.image_url_path)) {
-              File file = new File(dbOld.image_url_path);
-              if (file.isFile()) {
-                file.delete();
+
+              List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+                  "image_url_path = \"" + dbOld.image_url_path + "\"");
+              if (list != null && list.size() > 0) {
+                //还有其他地方再用，不要删除
+              } else {
+                File file = new File(dbOld.image_url_path);
+                if (file.isFile()) {
+                  file.delete();
+                }
               }
             }
           } catch (Exception e) {
@@ -445,10 +456,12 @@ public class BroadcastView extends FrameLayout {
     List<BroadcastData> bs = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
         "contentGappercent = " + mIndexID + "");
     if (bs == null || bs.size() == 0) {
+      Slog.d(TAG, "checkHaveMediaToPlay  []:" + 1 + "");
       return false;
     }
     //
     if (loadedAmount() == 0) {
+      Slog.d(TAG, "checkHaveMediaToPlay  []:" + 2 + "");
       return false;
     }
     for (BroadcastData b : bs) {
@@ -456,6 +469,7 @@ public class BroadcastView extends FrameLayout {
         return true;
       }
     }
+    Slog.d(TAG, "checkHaveMediaToPlay  []:" + 3 + "");
     return false;
   }
 
@@ -637,9 +651,26 @@ public class BroadcastView extends FrameLayout {
     boolean tagneedTodown = false;
     if (list != null && list.size() > 0) {
       for (BroadcastData media : list) {
-        if (media.isMieda() && TextUtils.isEmpty(media.image_url_path)) {
-          startDownload(media.image_url);
-          tagneedTodown = true;
+        if (media.isMieda()) {
+          List<BroadcastData> l = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+              "image_url = \"" + media.image_url + "\"");
+          if (l != null && l.size() > 0) {
+            for (BroadcastData broadcastData : l) {
+              if (!TextUtils.isEmpty(broadcastData.image_url_path)) {
+                media.image_url_path = l.get(0).image_url_path;
+                KJDB.getDefaultInstance().update(media);
+                break;
+              }
+            }
+          }else {
+            Slog.d(TAG, "checkDownload  []: l is null");
+          }
+
+
+          if (TextUtils.isEmpty(media.image_url_path)) {
+            startDownload(media.image_url);
+            tagneedTodown = true;
+          }
         }
       }
     }

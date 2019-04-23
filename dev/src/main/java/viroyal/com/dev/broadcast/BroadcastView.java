@@ -153,16 +153,16 @@ public class BroadcastView extends FrameLayout {
   }
 
   public void destory() {
-    /*if (broadcastDataCurrent != null) {
-      View view = onlyGetBView(broadcastDataCurrent);
-      if (view == null) {
-        return;
-      }
-      BroadcastViewItem viewItem = (BroadcastViewItem) view.getTag(R.id.tag_first);
-      if (viewItem != null) {
-        viewItem.destoryView();
-      }
-    }*/
+      /*if (broadcastDataCurrent != null) {
+        View view = onlyGetBView(broadcastDataCurrent);
+        if (view == null) {
+          return;
+        }
+        BroadcastViewItem viewItem = (BroadcastViewItem) view.getTag(R.id.tag_first);
+        if (viewItem != null) {
+          viewItem.destoryView();
+        }
+      }*/
 
     int count = getChildCount();
     for (int i = 0; i < count; i++) {
@@ -256,29 +256,13 @@ public class BroadcastView extends FrameLayout {
         "contentGappercent = " + mIndexID + "");
 
     if (dbOlds != null && dbOlds.size() > 0) {
+      boolean deleted = true;
+
       for (BroadcastData dbOld : dbOlds) {
         for (BroadcastData media : dataList) {
           //如果在返回的数据里面没有找到，则认为已经删除， id相同，url相同
           if (media.equals(dbOld)) {
-            needRefresh = true;
-            KJDB.getDefaultInstance().delete(dbOld);
-            try {
-              if (null != dbOld.image_url_path && !"".equals(dbOld.image_url_path)) {
-
-                List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
-                    "image_url_path = \"" + dbOld.image_url_path + "\"");
-                if (list != null && list.size() > 0) {
-                  //还有其他地方再用，不要删除
-                } else {
-                  File file = new File(dbOld.image_url_path);
-                  if (file.isFile()) {
-                    file.delete();
-                  }
-                }
-              }
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
+            deleted = false;
             break;
           } else {
             if (media.id == dbOld.id &&
@@ -287,10 +271,31 @@ public class BroadcastView extends FrameLayout {
                 dbOld.image_url.equals(media.image_url)) {
               media.image_url_path = dbOld.image_url_path;
               KJDB.getDefaultInstance().update(media);
+              deleted = false;
+              break;
             }
           }
         }
-
+        if (deleted) {
+          needRefresh = true;
+          KJDB.getDefaultInstance().delete(dbOld);
+          try {
+            if (null != dbOld.image_url_path && !"".equals(dbOld.image_url_path)) {
+              List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+                  "image_url_path = \"" + dbOld.image_url_path + "\"");
+              if (list != null && list.size() > 0) {
+                //还有其他地方再用，不要删除
+              } else {
+                File file = new File(dbOld.image_url_path);
+                if (file.isFile()) {
+                  file.delete();
+                }
+              }
+            }
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
       }
     }
 

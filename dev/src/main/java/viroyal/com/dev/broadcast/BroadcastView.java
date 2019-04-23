@@ -254,13 +254,31 @@ public class BroadcastView extends FrameLayout {
     //1 删除缺少的数据
     List<BroadcastData> dbOlds = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
         "contentGappercent = " + mIndexID + "");
+
     if (dbOlds != null && dbOlds.size() > 0) {
       for (BroadcastData dbOld : dbOlds) {
-        boolean deleted = true;
         for (BroadcastData media : dataList) {
           //如果在返回的数据里面没有找到，则认为已经删除， id相同，url相同
           if (media.equals(dbOld)) {
-            deleted = false;
+            needRefresh = true;
+            KJDB.getDefaultInstance().delete(dbOld);
+            try {
+              if (null != dbOld.image_url_path && !"".equals(dbOld.image_url_path)) {
+
+                List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
+                    "image_url_path = \"" + dbOld.image_url_path + "\"");
+                if (list != null && list.size() > 0) {
+                  //还有其他地方再用，不要删除
+                } else {
+                  File file = new File(dbOld.image_url_path);
+                  if (file.isFile()) {
+                    file.delete();
+                  }
+                }
+              }
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
             break;
           } else {
             if (media.id == dbOld.id &&
@@ -268,31 +286,11 @@ public class BroadcastView extends FrameLayout {
                 !TextUtils.isEmpty(dbOld.image_url_path) &&
                 dbOld.image_url.equals(media.image_url)) {
               media.image_url_path = dbOld.image_url_path;
-              dbOld.image_url_path = null;
+              KJDB.getDefaultInstance().update(media);
             }
           }
         }
-        if (deleted) {
-          needRefresh = true;
-          KJDB.getDefaultInstance().delete(dbOld);
-          try {
-            if (null != dbOld.image_url_path && !"".equals(dbOld.image_url_path)) {
 
-              List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
-                  "image_url_path = \"" + dbOld.image_url_path + "\"");
-              if (list != null && list.size() > 0) {
-                //还有其他地方再用，不要删除
-              } else {
-                File file = new File(dbOld.image_url_path);
-                if (file.isFile()) {
-                  file.delete();
-                }
-              }
-            }
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
       }
     }
 
@@ -662,7 +660,7 @@ public class BroadcastView extends FrameLayout {
                 break;
               }
             }
-          }else {
+          } else {
             Slog.d(TAG, "checkDownload  []: l is null");
           }
 

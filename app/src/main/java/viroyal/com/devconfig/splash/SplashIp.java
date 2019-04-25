@@ -24,6 +24,13 @@ public class SplashIp extends SplashIpActivity<SplashAppDelegate, SplashModel> {
   }
 
   @Override
+  public boolean openDemoMode() {
+    super.openDemoMode();
+    viewDelegate.toast("开启演示模式");
+    return false;
+  }
+
+  @Override
   protected String getHostApi() {
     return "https://mcpapi.iyuyun.net:18443/";
   }

@@ -485,6 +485,7 @@ public class BroadcastView extends FrameLayout {
   }
 
   private synchronized void playNextMedia() {
+
     Slog.d(TAG, "playNextMedia  []:20190321-1");
     if (!enablePlaying) {
       Slog.d(TAG, "playNextMedia  []: now enablePlaying is false, stop playing !!!");

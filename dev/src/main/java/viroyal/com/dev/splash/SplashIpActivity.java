@@ -3,8 +3,10 @@ package viroyal.com.dev.splash;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -44,6 +46,14 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
         .setTitle("配置加载")
         .setCancelable(false)
         .setMessage("正在加载配置信息...")
+        .setPositiveButton(" ", new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            Slog.d(TAG, "onClick  [dialog, which]:" + which);
+            openDemoMode();
+            handleSplash();
+          }
+        })
         .create();
     alertDialog.show();
     RxPermissions.getInstance(this).request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -60,6 +70,14 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
         });
   }
 
+  //开启演示模式
+  @CallSuper
+  public boolean openDemoMode() {
+    Slog.d(TAG, "openDemoMode  []:");
+    ConfigDevice.DEMO_MODE = true;
+    return false;
+  }
+
   public void getMacApi(final Context context) {
     if (TextUtils.isEmpty(ConfigDevice.getDeviceId())) {
       Slog.d(TAG, "getMacApi [context]:");
@@ -67,6 +85,7 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
         @Override
         public void run() {
           Slog.d(TAG, "run []:");
+          alertDialog.getButton(-1).setText("开启演示模式");
           alertDialog.setMessage("Mac地址获取失败，请手动写入！");
         }
       });
@@ -90,13 +109,14 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
         if (r.error_code == 1000) {
           handleSplash();
         } else {
+          alertDialog.getButton(-1).setText("开启演示模式");
           if (TextUtils.isEmpty(SPUtils.getInstance(context).get("api_config"))) {
             Slog.d(TAG, "getApi [context]:");
             runOnUiThread(new Runnable() {
               @Override
               public void run() {
                 Slog.d(TAG, "run []:");
-                alertDialog.setMessage(""+r.error_code+":"+r.error_msg + "\nmac:" + ConfigDevice.getDeviceId(context));
+                alertDialog.setMessage("" + r.error_code + ":" + r.error_msg + "\nmac:" + ConfigDevice.getDeviceId(context));
               }
             });
             Observable.timer(mAPITime, TimeUnit.MILLISECONDS).subscribe(new Action1<Long>() {
@@ -115,18 +135,20 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
   }
 
   public void handleSplash() {
-    String path = Environment.getExternalStorageDirectory() + File.separator + "viroyal_mac.txt";
-    File file = new File(path);
-    if (!file.exists()) {
-      try {
-        //后面这个参数代表是不是要接上文件中原来的数据，不进行覆盖
-        FileWriter filerWriter = new FileWriter(file, false);
-        BufferedWriter bufWriter = new BufferedWriter(filerWriter);
-        bufWriter.write(ConfigDevice.getDeviceId());
-        bufWriter.close();
-        filerWriter.close();
-      } catch (IOException e) {
-        e.printStackTrace();
+    if (!ConfigDevice.DEMO_MODE) {
+      String path = Environment.getExternalStorageDirectory() + File.separator + "viroyal_mac.txt";
+      File file = new File(path);
+      if (!file.exists()) {
+        try {
+          //后面这个参数代表是不是要接上文件中原来的数据，不进行覆盖
+          FileWriter filerWriter = new FileWriter(file, false);
+          BufferedWriter bufWriter = new BufferedWriter(filerWriter);
+          bufWriter.write(ConfigDevice.getDeviceId());
+          bufWriter.close();
+          filerWriter.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
       }
     }
     alertDialog.dismiss();

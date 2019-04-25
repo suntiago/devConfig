@@ -29,6 +29,8 @@ public class ConfigDevice {
   private static String GETAPI_URL_MCPAPI = "";
   public static String school_id = "";
   public static String operator = "";
+  //是否开启演示模式
+  public static boolean DEMO_MODE = false;
 
   //获取设备ip地址
   public static String getDeviceId(Context context) {

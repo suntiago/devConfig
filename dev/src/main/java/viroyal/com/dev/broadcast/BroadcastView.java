@@ -580,6 +580,9 @@ public class BroadcastView extends FrameLayout {
         }
       }
     } else {
+      if(null != onNoMediaListener){
+        onNoMediaListener.setOnNoMediaListener();
+      }
       //所有的view 都不显示了
       int count = getChildCount();
       for (int i = 0; i < count; i++) {
@@ -721,5 +724,15 @@ public class BroadcastView extends FrameLayout {
 
   public interface ItemClickCallback {
     void onclickItem(BroadcastData data, BroadcastViewItem item);
+  }
+
+  private OnNoMediaListener onNoMediaListener;
+
+  public interface OnNoMediaListener{
+    void setOnNoMediaListener();
+  }
+
+  public void setOnNoMediaListener(OnNoMediaListener onNoMediaListener) {
+    this.onNoMediaListener = onNoMediaListener;
   }
 }

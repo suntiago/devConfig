@@ -1,15 +1,21 @@
 package viroyal.com.devconfig.splash;
 
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 
+import com.suntiago.baseui.activity.base.theMvp.model.BaseModel;
 import com.suntiago.baseui.activity.base.theMvp.model.IModel;
 
 /**
- * Created by zy on 2019/1/25.
+ *
+ * @author zy
+ * @date 2019/1/25
  */
 
 
-public class SplashModel implements IModel {
+@SuppressLint("ParcelCreator")
+public class SplashModel extends BaseModel {
+
   @Override
   public int describeContents() {
     return 0;

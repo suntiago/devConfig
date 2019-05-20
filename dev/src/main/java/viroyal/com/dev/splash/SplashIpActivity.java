@@ -10,6 +10,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.View;
 
 import com.suntiago.baseui.activity.base.AppDelegateBase;
 import com.suntiago.baseui.activity.base.theMvp.model.IModel;
@@ -37,6 +38,10 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
   //正在加载弹出框
   private AlertDialog alertDialog;
   int mAPITime = 1000 * 10;
+  /**
+   * 是否显示演示模式文案
+   */
+  protected boolean isShowDemoMode = true;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,18 +49,18 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
     ConfigDevice.school_id = SPUtils.getInstance(this).get("school_id", "");
     ConfigDevice.operator = SPUtils.getInstance(this).get("operator", "");
     alertDialog = new AlertDialog.Builder(this)
-        .setTitle("配置加载")
-        .setCancelable(false)
-        .setMessage("正在加载配置信息...")
-        .setPositiveButton(" ", new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which) {
-            Slog.d(TAG, "onClick  [dialog, which]:" + which);
-            openDemoMode();
-            handleSplash();
-          }
-        })
-        .create();
+            .setTitle("配置加载")
+            .setCancelable(false)
+            .setMessage("正在加载配置信息...")
+            .setPositiveButton(" ", new DialogInterface.OnClickListener() {
+              @Override
+              public void onClick(DialogInterface dialog, int which) {
+                Slog.d(TAG, "onClick  [dialog, which]:" + which);
+                openDemoMode();
+                handleSplash();
+              }
+            })
+            .create();
     alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
       @Override
       public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
@@ -67,17 +72,20 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
     });
     alertDialog.show();
     RxPermissions.getInstance(this).request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.READ_EXTERNAL_STORAGE)
-        .subscribe(new Action1<Boolean>() {
-          @Override
-          public void call(Boolean granted) {
-            if (granted) {
-              getMacApi(SplashIpActivity.this);
-            } else {
-              Slog.d(TAG, "call  [granted]:" + granted);
-            }
-          }
-        });
+            Manifest.permission.READ_EXTERNAL_STORAGE)
+            .subscribe(new Action1<Boolean>() {
+              @Override
+              public void call(Boolean granted) {
+                if (granted) {
+                  getMacApi(SplashIpActivity.this);
+                } else {
+                  Slog.d(TAG, "call  [granted]:" + granted);
+                }
+              }
+            });
+    if(null != alertDialog.getButton(-1)){
+      alertDialog.getButton(-1).setVisibility(isShowDemoMode ? View.VISIBLE : View.INVISIBLE);
+    }
   }
 
   //开启演示模式

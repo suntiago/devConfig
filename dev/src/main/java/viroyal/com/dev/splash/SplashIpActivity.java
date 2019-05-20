@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 
 import com.suntiago.baseui.activity.base.AppDelegateBase;
 import com.suntiago.baseui.activity.base.theMvp.model.IModel;
@@ -55,6 +56,15 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
           }
         })
         .create();
+    alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+      @Override
+      public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+          onBackPressed();
+        }
+        return false;
+      }
+    });
     alertDialog.show();
     RxPermissions.getInstance(this).request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
         Manifest.permission.READ_EXTERNAL_STORAGE)

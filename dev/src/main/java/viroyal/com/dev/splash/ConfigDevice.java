@@ -42,17 +42,21 @@ public class ConfigDevice {
     return MacUtil.getLocalMacAddressFromIp();
   }
 
+  private static String api_neiwang;
+  private static String netty_host_neiwang;
+  private static String netty_port_neiwang;
 
-  public String getNeiwangIP(Context context) {
-    return SPUtils.getInstance(context).get("api_neiwang");
+
+  public static String getNeiwangIP() {
+    return api_neiwang;
   }
 
-  public String getNeiwangSocketHost(Context context) {
-    return SPUtils.getInstance(context).get("netty_host_neiwang");
+  public static String getNeiwangSocketHost() {
+    return netty_host_neiwang;
   }
 
-  public String getNeiwangSocketPort(Context context) {
-    return SPUtils.getInstance(context).get("netty_port_neiwang");
+  public static String getNeiwangSocketPort() {
+    return netty_port_neiwang;
   }
 
   @Deprecated
@@ -68,12 +72,19 @@ public class ConfigDevice {
 
   //配置ip地址
   public static Subscription configIp(String hostApi, final Context context, String deviceType, final Action1<BaseResponse> action) {
+
     if (TextUtils.isEmpty(hostApi)) {
       hostApi = GETAPI_URL_MCPAPI;
     }
+
     if (TextUtils.isEmpty(deviceType)) {
       deviceType = "default";
     }
+
+    api_neiwang = SPUtils.getInstance(context).get("api_neiwang");
+    netty_host_neiwang = SPUtils.getInstance(context).get("netty_host_neiwang");
+    netty_port_neiwang = SPUtils.getInstance(context).get("netty_port_neiwang");
+
     return Api.get().getApi(IpConfig.class, hostApi)
         .api(ConfigDevice.getDeviceId(context), deviceType)
         .subscribeOn(Schedulers.newThread())
@@ -102,6 +113,10 @@ public class ConfigDevice {
                 SPUtils.getInstance(context).put("api_neiwang", ac.api_neiwang);
                 SPUtils.getInstance(context).put("netty_host_neiwang", ac.netty_host_neiwang);
                 SPUtils.getInstance(context).put("netty_port_neiwang", ac.netty_port_neiwang);
+
+                api_neiwang = SPUtils.getInstance(context).get("api_neiwang");
+                netty_host_neiwang = SPUtils.getInstance(context).get("netty_host_neiwang");
+                netty_port_neiwang = SPUtils.getInstance(context).get("netty_port_neiwang");
               }
             }
             if (action != null) {

@@ -42,10 +42,25 @@ public class ConfigDevice {
     return MacUtil.getLocalMacAddressFromIp();
   }
 
+
+  public String getNeiwangIP(Context context) {
+    return SPUtils.getInstance(context).get("api_neiwang");
+  }
+
+  public String getNeiwangSocketHost(Context context) {
+    return SPUtils.getInstance(context).get("netty_host_neiwang");
+  }
+
+  public String getNeiwangSocketPort(Context context) {
+    return SPUtils.getInstance(context).get("netty_port_neiwang");
+  }
+
+  @Deprecated
   public static void setGetapiUrl(String url) {
     GETAPI_URL_MCPAPI = url;
   }
 
+  @Deprecated
   //配置ip地址
   public static Subscription configIp(final Context context, String deviceType, final Action1<BaseResponse> action) {
     return configIp(GETAPI_URL_MCPAPI, context, deviceType, action);
@@ -83,6 +98,10 @@ public class ConfigDevice {
                 }
                 Slog.d(TAG, "call [rsp]:school_id:" + ac.school_id);
                 Api.get().setApiConfig(ac.api + "/", ac.netty_host, ac.netty_port);
+
+                SPUtils.getInstance(context).put("api_neiwang", ac.api_neiwang);
+                SPUtils.getInstance(context).put("netty_host_neiwang", ac.netty_host_neiwang);
+                SPUtils.getInstance(context).put("netty_port_neiwang", ac.netty_port_neiwang);
               }
             }
             if (action != null) {

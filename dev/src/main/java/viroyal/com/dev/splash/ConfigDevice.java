@@ -83,47 +83,47 @@ public class ConfigDevice {
 
     api_neiwang = SPUtils.getInstance(context).get("api_neiwang");
     netty_host_neiwang = SPUtils.getInstance(context).get("netty_host_neiwang");
-    netty_port_neiwang = SPUtils.getInstance(context).get("netty_port_neiwang");
+    netty_port_neiwang = String.valueOf(SPUtils.getInstance(context).get("netty_port_neiwang", 0));
 
     return Api.get().getApi(IpConfig.class, hostApi)
-        .api(ConfigDevice.getDeviceId(context), deviceType)
-        .subscribeOn(Schedulers.newThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new BaseRspObserver<ApiResponse>(ApiResponse.class, new Action1<ApiResponse>() {
-          @Override
-          public void call(ApiResponse rsp) {
-            if (rsp.error_code == 1000) {
-              Slog.d(TAG, "call [rsp]:" + rsp.apiModel.config);
-              if (!SPUtils.getInstance(context).get("api_config").equals(rsp.apiModel.config)) {
-                Gson gson = new Gson();
-                ApiConfig ac = gson.fromJson(rsp.apiModel.config, ApiConfig.class);
+            .api(ConfigDevice.getDeviceId(context), deviceType)
+            .subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new BaseRspObserver<ApiResponse>(ApiResponse.class, new Action1<ApiResponse>() {
+              @Override
+              public void call(ApiResponse rsp) {
+                if (rsp.error_code == 1000) {
+                  Slog.d(TAG, "call [rsp]:" + rsp.apiModel.config);
+                  if (!SPUtils.getInstance(context).get("api_config").equals(rsp.apiModel.config)) {
+                    Gson gson = new Gson();
+                    ApiConfig ac = gson.fromJson(rsp.apiModel.config, ApiConfig.class);
 
-                SPUtils.getInstance(context).put("api_config", rsp.apiModel.config);
-                if (!TextUtils.isEmpty(rsp.apiModel.school_id)) {
-                  SPUtils.getInstance(context).put("school_id", rsp.apiModel.school_id);
-                  school_id = rsp.apiModel.school_id;
+                    SPUtils.getInstance(context).put("api_config", rsp.apiModel.config);
+                    if (!TextUtils.isEmpty(rsp.apiModel.school_id)) {
+                      SPUtils.getInstance(context).put("school_id", rsp.apiModel.school_id);
+                      school_id = rsp.apiModel.school_id;
+                    }
+                    if (!TextUtils.isEmpty(ac.school_id)) {
+                      SPUtils.getInstance(context).put("school_id", ac.school_id);
+                      school_id = ac.school_id;
+                    }
+                    Slog.d(TAG, "call [rsp]:school_id:" + ac.school_id);
+                    Api.get().setApiConfig(ac.api + "/", ac.netty_host, ac.netty_port);
+
+                    SPUtils.getInstance(context).put("api_neiwang", ac.api_neiwang);
+                    SPUtils.getInstance(context).put("netty_host_neiwang", ac.netty_host_neiwang);
+                    SPUtils.getInstance(context).put("netty_port_neiwang", ac.netty_port_neiwang);
+
+                    api_neiwang = SPUtils.getInstance(context).get("api_neiwang");
+                    netty_host_neiwang = SPUtils.getInstance(context).get("netty_host_neiwang");
+                    netty_port_neiwang = String.valueOf(SPUtils.getInstance(context).get("netty_port_neiwang", 0));
+                  }
                 }
-                if (!TextUtils.isEmpty(ac.school_id)) {
-                  SPUtils.getInstance(context).put("school_id", ac.school_id);
-                  school_id = ac.school_id;
+                if (action != null) {
+                  action.call(rsp);
                 }
-                Slog.d(TAG, "call [rsp]:school_id:" + ac.school_id);
-                Api.get().setApiConfig(ac.api + "/", ac.netty_host, ac.netty_port);
-
-                SPUtils.getInstance(context).put("api_neiwang", ac.api_neiwang);
-                SPUtils.getInstance(context).put("netty_host_neiwang", ac.netty_host_neiwang);
-                SPUtils.getInstance(context).put("netty_port_neiwang", ac.netty_port_neiwang);
-
-                api_neiwang = SPUtils.getInstance(context).get("api_neiwang");
-                netty_host_neiwang = SPUtils.getInstance(context).get("netty_host_neiwang");
-                netty_port_neiwang = SPUtils.getInstance(context).get("netty_port_neiwang");
               }
-            }
-            if (action != null) {
-              action.call(rsp);
-            }
-          }
-        }));
+            }));
   }
 
   interface IpConfig {

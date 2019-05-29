@@ -378,11 +378,16 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
     public void run() {
       Slog.d(TAG, "mScanningFishedRunnable run  []:");
       isScaning = true;
-      String barcode = mStringBufferResult.toString();
+      String barcode = null;
+      if (mStringBufferResult != null) {
+        barcode = mStringBufferResult.toString();
+      }
       if (barcode == null) {
         barcode = "";
       }
-      mStringBufferResult.setLength(0);
+      if (mStringBufferResult != null) {
+        mStringBufferResult.setLength(0);
+      }
       readAddedNfcId(barcode);
       sacnStatus = false;
 

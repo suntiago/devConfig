@@ -100,7 +100,7 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
             initNFC();
           } else {
             viewDelegate.showToast(
-                getResources().getString(R.string.please_turn_on_the_permission_of_nfc));
+                    getResources().getString(R.string.please_turn_on_the_permission_of_nfc));
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             intent.setData(Uri.parse("package:" + NFCMonitorBaseActivity.this.getPackageName()));
             startActivity(intent);
@@ -115,9 +115,9 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
         return;
       }
       mPendingIntent = PendingIntent.getActivity(this, 0,
-          new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+              new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
       mNdefPushMessage = new NdefMessage(new NdefRecord[]{newTextRecord(
-          "Message from NFC Reader :-)", Locale.ENGLISH, true)});
+              "Message from NFC Reader :-)", Locale.ENGLISH, true)});
     }
   }
 
@@ -209,8 +209,8 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
   private void resolveIntent(Intent intent) {
     String action = intent.getAction();
     if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
-        || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
-        || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
+            || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
       Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
       NdefMessage[] msgs;
       if (rawMsgs != null) {
@@ -430,7 +430,9 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
       //本次刷卡结束
       if (index == 10) {
         for (int j = 0; j < 10; j++) {
-          mStringBufferResult.append(code[j]);
+          if (mStringBufferResult != null) {
+            mStringBufferResult.append(code[j]);
+          }
         }
         index = 0;
         mHandler.removeCallbacks(mScanningFishedRunnable);

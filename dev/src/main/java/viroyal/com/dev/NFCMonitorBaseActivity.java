@@ -360,6 +360,12 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (NFCSwitch() == NFCSwitch.ADDED) {
+      // 根据食堂后台配置刷卡类型的需求，在onCreate时若NFCSwitch不为added（缓存），mStringBufferResult将得不到初始化
+      // 导致刷卡会一直获取空值（""）
+      // 这里重新初始化是为了应对通过后台拿到数据重新设置为added的情况
+      if (mStringBufferResult == null) {
+        mStringBufferResult = new StringBuilder();
+      }
       analysisKeyEvent(event);
     }
     return super.onKeyDown(keyCode, event);
@@ -379,12 +385,6 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
       Slog.d(TAG, "mScanningFishedRunnable run  []:");
       isScaning = true;
       String barcode = null;
-      // 根据食堂后台配置刷卡类型的需求，在onCreate时若NFCSwitch不为added（缓存），mStringBufferResult将得不到初始化
-      // 导致刷卡会一直获取空值（""）
-      // 这里重新初始化是为了应对通过后台拿到数据重新设置为added的情况
-      if (mStringBufferResult == null && NFCSwitch() == NFCSwitch.ADDED) {
-        mStringBufferResult = new StringBuilder();
-      }
       if (mStringBufferResult != null) {
         barcode = mStringBufferResult.toString();
       }

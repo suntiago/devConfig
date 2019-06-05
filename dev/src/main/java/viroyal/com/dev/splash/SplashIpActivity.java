@@ -49,18 +49,18 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
     ConfigDevice.school_id = SPUtils.getInstance(this).get("school_id", "");
     ConfigDevice.operator = SPUtils.getInstance(this).get("operator", "");
     alertDialog = new AlertDialog.Builder(this)
-            .setTitle("配置加载")
-            .setCancelable(false)
-            .setMessage("正在加载配置信息...")
-            .setPositiveButton(" ", new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface dialog, int which) {
-                Slog.d(TAG, "onClick  [dialog, which]:" + which);
-                openDemoMode();
-                handleSplash();
-              }
-            })
-            .create();
+        .setTitle("配置加载")
+        .setCancelable(false)
+        .setMessage("正在加载配置信息...")
+        .setPositiveButton(" ", new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            Slog.d(TAG, "onClick  [dialog, which]:" + which);
+            openDemoMode();
+            handleSplash();
+          }
+        })
+        .create();
     alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
       @Override
       public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
@@ -72,18 +72,18 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
     });
     alertDialog.show();
     RxPermissions.getInstance(this).request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE)
-            .subscribe(new Action1<Boolean>() {
-              @Override
-              public void call(Boolean granted) {
-                if (granted) {
-                  getMacApi(SplashIpActivity.this);
-                } else {
-                  Slog.d(TAG, "call  [granted]:" + granted);
-                }
-              }
-            });
-    if(null != alertDialog.getButton(-1)){
+        Manifest.permission.READ_EXTERNAL_STORAGE)
+        .subscribe(new Action1<Boolean>() {
+          @Override
+          public void call(Boolean granted) {
+            if (granted) {
+              getMacApi(SplashIpActivity.this);
+            } else {
+              Slog.d(TAG, "call  [granted]:" + granted);
+            }
+          }
+        });
+    if (null != alertDialog.getButton(-1)) {
       alertDialog.getButton(-1).setVisibility(isShowDemoMode ? View.VISIBLE : View.INVISIBLE);
     }
   }
@@ -92,7 +92,8 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
   @CallSuper
   public boolean openDemoMode() {
     Slog.d(TAG, "openDemoMode  []:");
-    ConfigDevice.DEMO_MODE = true;
+
+    ConfigDevice.configDemoMode();
     return false;
   }
 

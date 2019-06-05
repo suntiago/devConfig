@@ -46,6 +46,15 @@ public class ConfigDevice {
   private static String netty_host_neiwang;
   private static String netty_port_neiwang;
 
+  protected static void configDemoMode() {
+    DEMO_MODE = true;
+    api_neiwang = "https://192.168.1.208";
+    netty_host_neiwang = "192.168.1.208";
+    netty_port_neiwang = "8000";
+    school_id = "1001";
+    Api.get().setApiConfig("https://192.168.1.208" + "/", "192.168.1.208", 8000);
+
+  }
 
   public static String getNeiwangIP() {
     return api_neiwang;

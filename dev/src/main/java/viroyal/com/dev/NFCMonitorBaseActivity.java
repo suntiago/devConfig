@@ -279,8 +279,6 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
   char[] code = new char[10];
   //记录刷卡字节的顺序
   int index = 0;
-  //记录刷卡状态
-  volatile boolean sacnStatus = false;
   private boolean mCaps;
   private StringBuilder mStringBufferResult;
   private final Handler mHandler = new Handler();
@@ -395,7 +393,6 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
         mStringBufferResult.setLength(0);
       }
       readAddedNfcId(barcode);
-      sacnStatus = false;
     }
   };
 
@@ -455,11 +452,6 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
         //排除非法字符
         return;
       }
-      if (!sacnStatus) {
-        mHandler.removeCallbacks(mScanningFishedRunnable);
-        mHandler.postDelayed(mScanningFishedRunnable, 2000);
-      }
-
       if (index < 10) {
         code[index] = c;
         index++;

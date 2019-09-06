@@ -33,5 +33,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     compile 'com.github.suntiago:baseui:d9944b43e1'
+    compile 'com.github.suntiago:baseui:cf4ab4b6df'
     implementation 'com.tencent:mmkv:1.0.19'
 }

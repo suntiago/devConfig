@@ -188,13 +188,13 @@ public class BroadcastVideo implements BroadcastViewItem<BroadcastData> {
       }
     });
 
-    mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-      @Override
-      public boolean onError(MediaPlayer mp, int what, int extra) {
-        play(0);
-        return false;
-      }
-    });
+//    mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+//      @Override
+//      public boolean onError(MediaPlayer mp, int what, int extra) {
+//        play(0);
+//        return false;
+//      }
+//    });
   }
 
   private void stopPlay() {

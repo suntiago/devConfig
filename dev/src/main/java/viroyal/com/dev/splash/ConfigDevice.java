@@ -28,6 +28,7 @@ public class ConfigDevice {
   private final static String TAG = "ConfigDevice";
   private static String GETAPI_URL_MCPAPI = "";
   public static String school_id = "";
+  public static String serial_number = "";
   public static String operator = "";
   //是否开启演示模式
   public static boolean DEMO_MODE = false;
@@ -108,6 +109,12 @@ public class ConfigDevice {
                     ApiConfig ac = gson.fromJson(rsp.apiModel.config, ApiConfig.class);
 
                     SPUtils.getInstance(context).put("api_config", rsp.apiModel.config);
+                    //百度语音离线序列号
+                    if (!TextUtils.isEmpty(rsp.apiModel.serial_number)) {
+                      SPUtils.getInstance(context).put("serial_number", rsp.apiModel.serial_number);
+                      serial_number = rsp.apiModel.serial_number;
+                      Slog.d(TAG, "call [rsp]:serial_number:" + serial_number);
+                    }
                     if (!TextUtils.isEmpty(rsp.apiModel.school_id)) {
                       SPUtils.getInstance(context).put("school_id", rsp.apiModel.school_id);
                       school_id = rsp.apiModel.school_id;

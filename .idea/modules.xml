@@ -5,6 +5,8 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/dev/dev.iml" filepath="$PROJECT_DIR$/dev/dev.iml" />
       <module fileurl="file://$PROJECT_DIR$/devConfig.iml" filepath="$PROJECT_DIR$/devConfig.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/devConfig-app.iml" filepath="$PROJECT_DIR$/app/devConfig-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev/devConfig-dev.iml" filepath="$PROJECT_DIR$/dev/devConfig-dev.iml" />
     </modules>
   </component>
 </project>

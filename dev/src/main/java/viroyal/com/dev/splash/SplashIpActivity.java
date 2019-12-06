@@ -47,6 +47,7 @@ public abstract class SplashIpActivity<T extends AppDelegateBase, D extends IMod
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     ConfigDevice.school_id = SPUtils.getInstance(this).get("school_id", "");
+    ConfigDevice.serial_number = SPUtils.getInstance(this).get("serial_number", "");
     ConfigDevice.operator = SPUtils.getInstance(this).get("operator", "");
     alertDialog = new AlertDialog.Builder(this)
         .setTitle("配置加载")

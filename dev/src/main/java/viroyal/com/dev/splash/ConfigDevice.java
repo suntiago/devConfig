@@ -103,18 +103,21 @@ public class ConfigDevice {
               @Override
               public void call(ApiResponse rsp) {
                 if (rsp.error_code == 1000) {
-                  Slog.d(TAG, "call [rsp]:" + rsp.apiModel.config);
-                  if (!SPUtils.getInstance(context).get("api_config").equals(rsp.apiModel.config)) {
-                    Gson gson = new Gson();
-                    ApiConfig ac = gson.fromJson(rsp.apiModel.config, ApiConfig.class);
-
-                    SPUtils.getInstance(context).put("api_config", rsp.apiModel.config);
+                  if (!SPUtils.getInstance(context).get("serial_number").equals(rsp.apiModel.serial_number)) {
                     //百度语音离线序列号
                     if (!TextUtils.isEmpty(rsp.apiModel.serial_number)) {
                       SPUtils.getInstance(context).put("serial_number", rsp.apiModel.serial_number);
                       serial_number = rsp.apiModel.serial_number;
                       Slog.d(TAG, "call [rsp]:serial_number:" + serial_number);
                     }
+                  }
+
+                  Slog.d(TAG, "call [rsp]:" + rsp.apiModel.config);
+                  if (!SPUtils.getInstance(context).get("api_config").equals(rsp.apiModel.config)) {
+                    Gson gson = new Gson();
+                    ApiConfig ac = gson.fromJson(rsp.apiModel.config, ApiConfig.class);
+
+                    SPUtils.getInstance(context).put("api_config", rsp.apiModel.config);
                     if (!TextUtils.isEmpty(rsp.apiModel.school_id)) {
                       SPUtils.getInstance(context).put("school_id", rsp.apiModel.school_id);
                       school_id = rsp.apiModel.school_id;

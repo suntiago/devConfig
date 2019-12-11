@@ -31,6 +31,11 @@ public class SplashIp extends SplashIpActivity<SplashAppDelegate, SplashModel> {
   }
 
   @Override
+  protected NFCSwitch NFCSwitch() {
+    return NFCSwitch.SERIAL;
+  }
+
+  @Override
   protected String getHostApi() {
     return "https://mcpapi.iyuyun.net:18443/";
   }

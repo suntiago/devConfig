@@ -1,8 +1,12 @@
 package viroyal.com.dev;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -10,9 +14,13 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.annotation.CallSuper;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import com.suntiago.baseui.activity.base.AppDelegateBase;
@@ -20,6 +28,7 @@ import com.suntiago.baseui.activity.base.theMvp.model.IModel;
 import com.suntiago.baseui.utils.log.Slog;
 import com.suntiago.getpermission.rxpermissions.RxPermissions;
 
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +38,7 @@ import viroyal.com.dev.nfc.NdefMessageParser;
 import viroyal.com.dev.nfc.NfcParseUtil;
 import viroyal.com.dev.nfc.record.DefaultRecord;
 import viroyal.com.dev.nfc.record.ParsedNdefRecord;
+import viroyal.com.dev.nfcserial.NfcService;
 
 /**
  * Created by Zaiyu on 2019/3/22.
@@ -61,7 +71,8 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
   protected enum NFCSwitch {
     DEFAULT,
     STANDARD,
-    ADDED
+    ADDED,
+    SERIAL
   }
 
   protected NFCSwitch NFCSwitch() {
@@ -75,6 +86,8 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
       resolveIntent(getIntent());
     } else if (NFCSwitch() == NFCSwitch.ADDED) {
       mStringBufferResult = new StringBuilder();
+    } else if (NFCSwitch() == NFCSwitch.SERIAL) {
+      startNfcService();
     }
   }
 
@@ -85,6 +98,75 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
       initNFC();
     }
   }
+
+  /*-----------------------------------------NFC串口开始------------------------------------------------*/
+
+  private Intent serviceIntent;
+  private NfcService.MyBinder binder;
+
+  private ServiceConnection conn = new ServiceConnection() {
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+      binder = (NfcService.MyBinder) service;
+      Log.i(TAG, "onServiceConnected: binder" + binder);
+      //打开串口，进行读卡
+      if (binder != null)
+        binder.startLoop(handler);
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+      binder = null;
+    }
+  };
+
+  @SuppressLint("HandlerLeak")
+  Handler handler = new Handler() {
+
+    @Override
+    public void handleMessage(Message msg) {
+      Log.i(TAG, "读到NFC数据了");
+      switch (msg.what) {
+        case 0:
+          //数据回调
+          String data = (String) msg.obj;
+          if (data != null && data.length() > 0) {
+            Slog.d(TAG, "NFC数据 = " + data);
+            String sixteenStr = data.substring(4, 12);
+            Slog.d(TAG, "NFC数据 16进制= " + sixteenStr);
+            String tenStr = new BigInteger(sixteenStr, 16).toString();
+            if (!TextUtils.isEmpty(tenStr)) {
+              try {
+                String cardNo = String.format("%010d", Long.parseLong(tenStr));
+                Slog.d(TAG, "NFC数据 10进制= " + cardNo);
+                readSerialNfcId(cardNo);
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            }
+          }
+          break;
+        case 1:
+        default:
+          break;
+      }
+    }
+  };
+
+  private void startNfcService() {
+    serviceIntent = new Intent(this, NfcService.class);
+    startService(serviceIntent);
+  }
+
+  /**
+   * 后加的nfc,读取到数据后在此回调
+   */
+  protected void readSerialNfcId(String barcode) {
+    Slog.d(TAG, "readSerialNfcId performScanSuccess  [barcode]:" + barcode);
+  }
+
+  /*-----------------------------------------NFC串口结束------------------------------------------------*/
 
   /**
    * 初始化nfc
@@ -187,6 +269,8 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
     super.onResume();
     if (NFCSwitch() == NFCSwitch.STANDARD) {
       resumeNFC();
+    } else if(NFCSwitch() == NFCSwitch.SERIAL){
+      bindService(new Intent(this, NfcService.class), conn, Context.BIND_AUTO_CREATE);
     }
   }
 

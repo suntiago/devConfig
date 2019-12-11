@@ -13,6 +13,14 @@ android {
         targetSdkVersion rootProject.ext.android.targetSdkVersion
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         flavorDimensions "versionCode"
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+            }
+        }
     }
     dataBinding {
         enabled = true
@@ -22,6 +30,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            // 设置所要编写的c源码位置，以及编译后so文件的名字
+            path "CMakeLists.txt"
         }
     }
 }

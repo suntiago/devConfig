@@ -2,4 +2,11 @@
           package="viroyal.com.dev">
 
     <uses-permission android:name="android.permission.NFC"/>
+
+    <application>
+        <service
+            android:name=".nfcserial.NfcService"
+            android:enabled="true"
+            android:exported="true" />
+    </application>
 </manifest>

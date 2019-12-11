@@ -10,10 +10,10 @@ ext {
     ]
 
     android = [
-            minSdkVersion             : 16,
-            targetSdkVersion          : 28,
-            compileSdkVersion         : 26,
-            buildToolsVersion         : "26.0.2",
+            minSdkVersion             : 19,
+            targetSdkVersion          : 27,
+            compileSdkVersion         : 28,
+            buildToolsVersion         : "28.0.3",
             sourceCompatibilityVersion: JavaVersion.VERSION_1_8,
             targetCompatibilityVersion: JavaVersion.VERSION_1_8
     ]
@@ -30,9 +30,9 @@ ext {
             // Test Dependencies
             junit              : 'junit:junit:4.12',
             //android dependencies
-            appcompatV7        : 'com.android.support:appcompat-v7:25.1.0',
-            supportV4          : 'com.android.support:support-v4:23.3.0',
-            design             : 'com.android.support:design:24.0.0',
+            appcompatV7        : 'com.android.support:appcompat-v7:27.1.0',
+            supportV4          : 'com.android.support:support-v4:27.1.0',
+            design             : 'com.android.support:design:27.0.0',
             //utils dependencies
             androidannotations : 'com.android.support:support-annotations:+',
             rxandroid          : 'io.reactivex:rxandroid:1.2.1',

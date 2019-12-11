@@ -111,8 +111,9 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
       binder = (NfcService.MyBinder) service;
       Log.i(TAG, "onServiceConnected: binder" + binder);
       //打开串口，进行读卡
-      if (binder != null)
+      if (binder != null) {
         binder.startLoop(handler);
+      }
     }
 
     @Override
@@ -147,7 +148,6 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
             }
           }
           break;
-        case 1:
         default:
           break;
       }
@@ -279,6 +279,19 @@ public abstract class NFCMonitorBaseActivity<T extends AppDelegateBase, D extend
     super.onPause();
     if (NFCSwitch() == NFCSwitch.STANDARD) {
       pauseNFC();
+    }
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    try {
+      stopService(new Intent(NFCMonitorBaseActivity.this, NfcService.class));
+      if(null != conn){
+        unbindService(conn);
+      }
+    }catch (Exception e){
+      e.printStackTrace();
     }
   }
 

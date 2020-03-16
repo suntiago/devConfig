@@ -1,9 +1,0 @@
-[1/2] Building CXX object CMakeFiles/native-lib.dir/src/main/cpp/native-lib.cpp.o
-/Users/chenjunwei/资料/project/devConfig/dev/src/main/cpp/native-lib.cpp:117:31: warning: data argument not used by format string [-Wformat-extra-args]
-        LOGD("set_opt error", fd);
-             ~~~~~~~~~~~~~~~  ^
-/Users/chenjunwei/资料/project/devConfig/dev/src/main/cpp/native-lib.cpp:15:79: note: expanded from macro 'LOGD'
-#define LOGD(fmt, args...) __android_log_print(ANDROID_LOG_DEBUG, TAG, fmt, ##args)
-                                                                       ~~~    ^
-1 warning generated.
-[2/2] Linking CXX shared library ../../../../build/intermediates/cmake/debug/obj/armeabi-v7a/libnative-lib.so

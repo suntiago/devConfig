@@ -7,7 +7,6 @@ import android.text.TextUtils;
 
 import com.suntiago.baseui.activity.base.AppDelegateBase;
 import com.suntiago.baseui.activity.base.theMvp.model.IModel;
-import com.suntiago.dblib.DBUpdateHelper;
 import com.suntiago.network.network.Api;
 import com.suntiago.network.network.BaseRspObserver;
 
@@ -39,7 +38,6 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    KJDB.create(this, "testdb", true, 1, new DBUpdateHelper());
     syncOneSecond();
   }
 
@@ -62,7 +60,6 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
                 } else {
                   chooseStrategy(rsp);
                 }
-                splashFinish();
               }
             }));
     addRxSubscription(bootSubscription);
@@ -424,11 +421,6 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   }
 
   /*-----------------------------------------策略二结束------------------------------------------------*/
-
-  /**
-   * 加载完成的后续处理
-   */
-  protected abstract void splashFinish();
 
   /**
    * 获取请求主接口的api

@@ -38,7 +38,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    syncOneSecond();
+    syncFifteenSecond();
   }
 
   /**
@@ -73,13 +73,16 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   private void chooseOffLineStrategy(BootResponse rsp) {
     BootModel bootModel = rsp.bootModel;
     switch (bootModel.device_type) {
+      case 0:
+        setOffLineStrategyZero();
+        break;
       case 4:
         //大屏
-        setOffLineStrategyTwo();
+        setOffLineStrategyFour();
         break;
       case 15:
         //教师考勤
-        setOffLineStrategyOne();
+        setOffLineStrategyFifteen();
         break;
     }
   }
@@ -92,66 +95,214 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   private void chooseStrategy(BootResponse rsp) {
     BootModel bootModel = rsp.bootModel;
     switch (bootModel.device_type) {
+      case 0:
+        setStrategyZero(rsp);
+        break;
       case 4:
         //大屏
-        setStrategyTwo(rsp);
+        setStrategyFour(rsp);
         break;
       case 15:
         //教师考勤
-        setStrategyOne(rsp);
+        setStrategyFifteen(rsp);
         break;
     }
   }
 
-  /*-----------------------------------------策略一开始------------------------------------------------*/
+  /*-----------------------------------------策略零开始------------------------------------------------*/
+
+  private void setStrategyZero(BootResponse rsp) {
+    BootModel bootModel = rsp.bootModel;
+    setTodayStrategy(bootModel);
+    setTomorrowStrategyZero(bootModel.tomorrow);
+  }
+
+  private void setTomorrowStrategyZero(Tomorrow tomorrow) {
+    //成功
+    StringBuilder stringBuilder = new StringBuilder();
+    String tTitle = "{checkSwitch:true,type:0,settings:[{switch:true,";
+    stringBuilder.append(tTitle);
+    stringBuilder.append(getWakeupTimeStr(tomorrow.on_hour, tomorrow.on_minute));
+    stringBuilder.append(getSleepTimeStr(tomorrow.off_hour, tomorrow.off_minute));
+    stringBuilder.append(getWeekRepeatStr(tomorrow.week));
+
+    Intent powerOnOffTimerIntent = new Intent("com.zhsd.setting.POWER_ON_OFF_TIMER");
+    powerOnOffTimerIntent.putExtra("data", stringBuilder.toString());
+    powerOnOffTimerIntent.putExtra("owner", "0");
+    sendBroadcast(powerOnOffTimerIntent);
+  }
+
+  private String getWakeupTimeStr(int startH, int startM) {
+    return "wakeupTime:\"" + String.format("%02d", new Object[]{Integer.valueOf(startH)}) + ":" + String.format("%02d", new Object[]{Integer.valueOf(startM)}) + "\"";
+  }
+
+  private String getSleepTimeStr(int endH, int endM) {
+    return "sleepTime:\"" + String.format("%02d", new Object[]{Integer.valueOf(endH)}) + ":" + String.format("%02d", new Object[]{Integer.valueOf(endM)}) + "\"";
+  }
+
+  private String getWeekRepeatStr(String weekdayStr) {
+    String ret = "week:[";
+    StringBuilder stringBuilder = new StringBuilder(ret);
+    if (TextUtils.isEmpty(weekdayStr)) {
+      stringBuilder.append("]");
+      return stringBuilder.toString();
+    }
+    if (weekdayStr.contains("1")) {
+      stringBuilder.append("\"monday\",");
+    }
+
+    if (weekdayStr.contains("2")) {
+      stringBuilder.append("\"tuesday\",");
+    }
+
+    if (weekdayStr.contains("3")) {
+      stringBuilder.append("\"wednesday\",");
+    }
+
+    if (weekdayStr.contains("4")) {
+      stringBuilder.append("\"thursday\",");
+    }
+
+    if (weekdayStr.contains("5")) {
+      stringBuilder.append("\"friday\",");
+    }
+
+    if (weekdayStr.contains("6")) {
+      stringBuilder.append("\"saturday\",");
+    }
+
+    if (weekdayStr.contains("7")) {
+      stringBuilder.append("\"sunday\",");
+    }
+
+    if (stringBuilder.toString().endsWith(",")) {
+      stringBuilder.replace(stringBuilder.toString().length() - 1, stringBuilder.toString().length(), "");
+    }
+
+    stringBuilder.append("]");
+
+    return stringBuilder.toString();
+  }
+
+  /**
+   * 离线设置策略15
+   * 临时>常规
+   */
+  private void setOffLineStrategyZero() {
+    setTodayOffLineStrategy();
+
+    setTomorrowOffLineStrategyZero();
+  }
+
+  private void setTomorrowOffLineStrategyZero() {
+    String nextDate = DateUtil.getNextDate() + " 00:00:00";
+    String tempWhereStr = "type='2' and '" + nextDate + "' between start_date and end_date";
+    String whereStr = "type='1' and '" + nextDate + "' between start_date and end_date";
+    List<Strategy> tempStrategyList = KJDB.getDefaultInstance().findAllByWhere(Strategy.class, tempWhereStr);
+    List<Strategy> normalStrategyList = KJDB.getDefaultInstance().findAllByWhere(Strategy.class, whereStr);
+    if (null != tempStrategyList && tempStrategyList.size() > 0) {
+      //临时策略
+      setTomorrowOffLineStrategyZero(tempStrategyList);
+      return;
+    }
+    if (null != normalStrategyList && normalStrategyList.size() > 0) {
+      //常规策略
+      setTomorrowOffLineStrategyZero(normalStrategyList);
+      return;
+    }
+    //无匹配策略
+    resetStrategyZero();
+  }
+
+  private void setTomorrowOffLineStrategyZero(List<Strategy> strategyList) {
+    if (strategyList.size() > 0) {
+      Strategy strategy = strategyList.get(0);
+      String on_hour = "0";
+      String on_minute = "0";
+      String off_hour = "0";
+      String off_minute = "0";
+      String week = DateUtil.getWeek(strategy.weeks);
+      String[] onTime = getTime(strategy.on_time);
+      if (null != onTime) {
+        on_hour = TextUtils.equals(onTime[0].substring(0, 1), "0") ? onTime[0].substring(1, 2) : onTime[0].substring(0, 2);
+        on_minute = TextUtils.equals(onTime[1].substring(0, 1), "0") ? onTime[1].substring(1, 2) : onTime[1].substring(0, 2);
+      }
+      String[] offTime = getTime(strategy.off_time);
+      if (null != offTime) {
+        off_hour = TextUtils.equals(offTime[0].substring(0, 1), "0") ? offTime[0].substring(1, 2) : offTime[0].substring(0, 2);
+        off_minute = TextUtils.equals(offTime[1].substring(0, 1), "0") ? offTime[1].substring(1, 2) : offTime[1].substring(0, 2);
+      }
+      Tomorrow tomorrow = new Tomorrow();
+      tomorrow.on_hour = DateUtil.toInt(on_hour);
+      tomorrow.on_minute = DateUtil.toInt(on_minute);
+      tomorrow.off_hour = DateUtil.toInt(off_hour);
+      tomorrow.off_minute = DateUtil.toInt(off_minute);
+      tomorrow.week = week;
+
+      setTomorrowStrategyZero(tomorrow);
+    }
+  }
+
+  private void resetStrategyZero() {
+    Intent powerOnOffTimerIntent = new Intent("com.zhsd.setting.POWER_ON_OFF_TIMER");
+    powerOnOffTimerIntent.putExtra("data", "{checkSwitch:true,type:0,settings:[]}");
+    powerOnOffTimerIntent.putExtra("owner", "0");
+    sendBroadcast(powerOnOffTimerIntent);
+  }
+
+  /*-----------------------------------------策略零结束------------------------------------------------*/
+
+  /*-----------------------------------------策略十五开始------------------------------------------------*/
 
   /**
    * 时间检测 定时器 60s一次
    */
-  private void syncOneSecond() {
-    Subscription syncOneSecond = Observable.timer(60, TimeUnit.MILLISECONDS)
+  private void syncFifteenSecond() {
+    Subscription syncFifteenSecond = Observable.timer(60, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<Long>() {
               @Override
               public void call(Long aLong) {
                 if (TextUtils.isEmpty(todayEndDate)) {
-                  syncOneSecond();
+                  syncFifteenSecond();
                   return;
                 }
                 if (System.currentTimeMillis() / 1000 + 5 * 60 >= DateUtil.getTimeStamp(todayEndDate)) {
-                  syncOneMin();
+                  syncFifteenMin();
                 } else {
                   //时间未到
-                  syncOneSecond();
+                  syncFifteenSecond();
                 }
               }
             });
-    addRxSubscription(syncOneSecond);
+    addRxSubscription(syncFifteenSecond);
   }
 
   /**
    * 时间检测 定时器 1分钟一次
    */
-  private void syncOneMin() {
+  private void syncFifteenMin() {
     getBootConfig();
-    Subscription syncOneMin = Observable.timer(60, TimeUnit.MILLISECONDS)
+    Subscription syncFifteenMin = Observable.timer(60, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<Long>() {
               @Override
               public void call(Long aLong) {
-                syncOneMin();
+                if (System.currentTimeMillis() / 1000 + 5 * 60 >= DateUtil.getTimeStamp(todayEndDate)) {
+                  syncFifteenMin();
+                }
               }
             });
-    addRxSubscription(syncOneMin);
+    addRxSubscription(syncFifteenMin);
   }
 
   /**
-   * 离线设置策略1
+   * 离线设置策略15
    * 临时>常规
    */
-  private void setOffLineStrategyOne() {
+  private void setOffLineStrategyFifteen() {
     setTodayOffLineStrategy();
 
     setTomorrowOffLineStrategy();
@@ -187,28 +338,28 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     List<Strategy> normalStrategyList = KJDB.getDefaultInstance().findAllByWhere(Strategy.class, whereStr);
     if (null != tempStrategyList && tempStrategyList.size() > 0) {
       //临时策略
-      setTomorrowOffLineStrategyOne(tempStrategyList);
+      setTomorrowOffLineStrategyFifteen(tempStrategyList);
       return;
     }
     if (null != normalStrategyList && normalStrategyList.size() > 0) {
       //常规策略
-      setTomorrowOffLineStrategyOne(normalStrategyList);
+      setTomorrowOffLineStrategyFifteen(normalStrategyList);
       return;
     }
     //无匹配策略
-    resetStrategy();
+    resetStrategyFifteen();
   }
 
-  private void setStrategyOne(BootResponse rsp) {
+  private void setStrategyFifteen(BootResponse rsp) {
     BootModel bootModel = rsp.bootModel;
     setTodayStrategy(bootModel);
     //成功
     Tomorrow tomorrow = bootModel.tomorrow;
     if (null != tomorrow) {
-      setTomorrowStrategy(tomorrow);
+      setTomorrowStrategyFifteen(tomorrow);
     } else {
       //说明明天无策略
-      resetStrategy();
+      resetStrategyFifteen();
     }
     //保存开机策略
     if (null != bootModel.strategy) {
@@ -226,7 +377,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     }
   }
 
-  private void setTomorrowOffLineStrategyOne(List<Strategy> strategyList) {
+  private void setTomorrowOffLineStrategyFifteen(List<Strategy> strategyList) {
     if (strategyList.size() > 0) {
       Strategy strategy = strategyList.get(0);
       String on_hour = "0";
@@ -251,7 +402,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       tomorrow.off_minute = DateUtil.toInt(off_minute);
       tomorrow.week = week;
 
-      setTomorrowStrategy(tomorrow);
+      setTomorrowStrategyFifteen(tomorrow);
     }
   }
 
@@ -271,11 +422,11 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   }
 
   /**
-   * 在线设置策略1
+   * 在线设置策略15
    *
    * @param tomorrow
    */
-  private void setTomorrowStrategy(Tomorrow tomorrow) {
+  private void setTomorrowStrategyFifteen(Tomorrow tomorrow) {
     //false - 关闭自动开机 true - 开启自动开机
     Intent autoBootIntent = new Intent("com.hra.setAutoBoot");
     autoBootIntent.putExtra("key", true);
@@ -310,7 +461,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   /**
    * 重置策略
    */
-  private void resetStrategy() {
+  private void resetStrategyFifteen() {
     //false - 关闭自动开机 true - 开启自动开机
     Intent autoBootIntent = new Intent("com.hra.setAutoBoot");
     autoBootIntent.putExtra("key", false);
@@ -331,19 +482,17 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   }
 
 
-  /*-----------------------------------------策略一结束------------------------------------------------*/
+  /*-----------------------------------------策略十五结束------------------------------------------------*/
 
+  /*-----------------------------------------策略四开始------------------------------------------------*/
 
-
-  /*-----------------------------------------策略二开始------------------------------------------------*/
-
-  private void setStrategyTwo(BootResponse rsp) {
+  private void setStrategyFour(BootResponse rsp) {
     BootModel bootModel = rsp.bootModel;
     setTodayStrategy(bootModel);
-    setTomorrowStrategyTwo(bootModel);
+    setTomorrowStrategyFour(bootModel);
   }
 
-  private void setTomorrowStrategyTwo(BootModel bootModel) {
+  private void setTomorrowStrategyFour(BootModel bootModel) {
     //成功
     Tomorrow tomorrow = bootModel.tomorrow;
     if (null != tomorrow) {
@@ -358,15 +507,15 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     }
 
     //开启定时任务
-    syncOneSecondTwo();
+    syncFifteenSecondFour();
   }
 
-  private void setOffLineStrategyTwo() {
+  private void setOffLineStrategyFour() {
     setTodayOffLineStrategy();
-    setTomorrowOffLineStrategyTwo();
+    setTomorrowOffLineStrategyFour();
   }
 
-  private void setTomorrowOffLineStrategyTwo() {
+  private void setTomorrowOffLineStrategyFour() {
     String nextDate = DateUtil.getNextDate() + " 00:00:00";
     String tempWhereStr = "type='2' and '" + nextDate + "' between start_date and end_date";
     String whereStr = "type='1' and '" + nextDate + "' between start_date and end_date";
@@ -385,21 +534,21 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     }
 
     //开启定时任务
-    syncOneSecondTwo();
+    syncFifteenSecondFour();
   }
 
   /**
    * 时间检测 定时器 1s一次
    */
-  private void syncOneSecondTwo() {
-    Subscription syncOneSecondTwo = Observable.timer(1, TimeUnit.MILLISECONDS)
+  private void syncFifteenSecondFour() {
+    Subscription syncFifteenSecondFour = Observable.timer(1, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<Long>() {
               @Override
               public void call(Long aLong) {
                 if (TextUtils.isEmpty(todayEndDate)) {
-                  syncOneSecondTwo();
+                  syncFifteenSecondFour();
                   return;
                 }
                 long todayEndDateTimeStamp = DateUtil.getTimeStamp(todayEndDate);
@@ -413,14 +562,14 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
                   }
                 } else {
                   //时间未到
-                  syncOneSecondTwo();
+                  syncFifteenSecondFour();
                 }
               }
             });
-    addRxSubscription(syncOneSecondTwo);
+    addRxSubscription(syncFifteenSecondFour);
   }
 
-  /*-----------------------------------------策略二结束------------------------------------------------*/
+  /*-----------------------------------------策略四结束------------------------------------------------*/
 
   /**
    * 获取请求主接口的api

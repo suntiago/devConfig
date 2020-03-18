@@ -38,7 +38,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    syncFifteenSecond();
+    syncOneSecond();
   }
 
   /**
@@ -257,26 +257,26 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   /**
    * 时间检测 定时器 60s一次
    */
-  private void syncFifteenSecond() {
-    Subscription syncFifteenSecond = Observable.timer(60, TimeUnit.SECONDS)
+  private void syncOneSecond() {
+    Subscription syncOneSecond = Observable.timer(60, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<Long>() {
               @Override
               public void call(Long aLong) {
                 if (TextUtils.isEmpty(todayEndDate)) {
-                  syncFifteenSecond();
+                  syncOneSecond();
                   return;
                 }
                 if (System.currentTimeMillis() / 1000 + 5 * 60 >= DateUtil.getTimeStamp(todayEndDate)) {
                   syncFifteenMin();
                 } else {
                   //时间未到
-                  syncFifteenSecond();
+                  syncOneSecond();
                 }
               }
             });
-    addRxSubscription(syncFifteenSecond);
+    addRxSubscription(syncOneSecond);
   }
 
   /**
@@ -507,7 +507,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     }
 
     //开启定时任务
-    syncFifteenSecondFour();
+    syncOneSecondFour();
   }
 
   private void setOffLineStrategyFour() {
@@ -534,21 +534,21 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     }
 
     //开启定时任务
-    syncFifteenSecondFour();
+    syncOneSecondFour();
   }
 
   /**
    * 时间检测 定时器 1s一次
    */
-  private void syncFifteenSecondFour() {
-    Subscription syncFifteenSecondFour = Observable.timer(1, TimeUnit.SECONDS)
+  private void syncOneSecondFour() {
+    Subscription syncOneSecondFour = Observable.timer(1, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<Long>() {
               @Override
               public void call(Long aLong) {
                 if (TextUtils.isEmpty(todayEndDate)) {
-                  syncFifteenSecondFour();
+                  syncOneSecondFour();
                   return;
                 }
                 long todayEndDateTimeStamp = DateUtil.getTimeStamp(todayEndDate);
@@ -562,11 +562,11 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
                   }
                 } else {
                   //时间未到
-                  syncFifteenSecondFour();
+                  syncOneSecondFour();
                 }
               }
             });
-    addRxSubscription(syncFifteenSecondFour);
+    addRxSubscription(syncOneSecondFour);
   }
 
   /*-----------------------------------------策略四结束------------------------------------------------*/

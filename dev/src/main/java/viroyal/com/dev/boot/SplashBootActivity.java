@@ -269,7 +269,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
                   return;
                 }
                 if (System.currentTimeMillis() / 1000 + 5 * 60 >= DateUtil.getTimeStamp(todayEndDate)) {
-                  syncFifteenMin();
+                  syncOneMin();
                 } else {
                   //时间未到
                   syncOneSecond();
@@ -282,20 +282,20 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   /**
    * 时间检测 定时器 1分钟一次
    */
-  private void syncFifteenMin() {
+  private void syncOneMin() {
     getBootConfig();
-    Subscription syncFifteenMin = Observable.timer(60, TimeUnit.SECONDS)
+    Subscription syncOneMin = Observable.timer(60, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<Long>() {
               @Override
               public void call(Long aLong) {
-                if (System.currentTimeMillis() / 1000 + 5 * 60 >= DateUtil.getTimeStamp(todayEndDate)) {
-                  syncFifteenMin();
+                if (System.currentTimeMillis() / 1000 < DateUtil.getTimeStamp(todayEndDate)) {
+                  syncOneMin();
                 }
               }
             });
-    addRxSubscription(syncFifteenMin);
+    addRxSubscription(syncOneMin);
   }
 
   /**

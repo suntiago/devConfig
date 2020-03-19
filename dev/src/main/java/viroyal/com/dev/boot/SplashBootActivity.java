@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.suntiago.baseui.activity.base.AppDelegateBase;
 import com.suntiago.baseui.activity.base.theMvp.model.IModel;
+import com.suntiago.baseui.utils.SPUtils;
 import com.suntiago.network.network.Api;
 import com.suntiago.network.network.BaseRspObserver;
 
@@ -72,7 +73,8 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
    */
   private void chooseOffLineStrategy(BootResponse rsp) {
     BootModel bootModel = rsp.bootModel;
-    switch (bootModel.device_type) {
+    int device_type = null == bootModel ? SPUtils.getInstance(this).get("device_type", 0) : bootModel.device_type;
+    switch (device_type) {
       case 0:
         setOffLineStrategyZero();
         break;
@@ -94,6 +96,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
    */
   private void chooseStrategy(BootResponse rsp) {
     BootModel bootModel = rsp.bootModel;
+    SPUtils.getInstance(this).put("device_type", bootModel.device_type);
     switch (bootModel.device_type) {
       case 0:
         setStrategyZero(rsp);
@@ -114,7 +117,46 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
   private void setStrategyZero(BootResponse rsp) {
     BootModel bootModel = rsp.bootModel;
     setTodayStrategy(bootModel);
-    setTomorrowStrategyZero(bootModel.tomorrow);
+    if (null == bootModel.tomorrow) {
+      resetStrategyZero();
+    } else {
+      //当天和明天的策略一致
+      bootModel.tomorrow.week = getWeek(bootModel.tomorrow.week);
+      setTomorrowStrategyZero(bootModel.tomorrow);
+    }
+    //保存开机策略
+    if (null != bootModel.strategy) {
+      KJDB.getDefaultInstance().deleteByWhere(Strategy.class, "1==1");
+      KJDB.getDefaultInstance().save(rsp.bootModel.strategy);
+    }
+  }
+
+  private String getWeek(String week) {
+    String weekStr = "";
+    switch (week) {
+      case "1":
+        weekStr = "71";
+        break;
+      case "2":
+        weekStr = "12";
+        break;
+      case "3":
+        weekStr = "23";
+        break;
+      case "4":
+        weekStr = "34";
+        break;
+      case "5":
+        weekStr = "45";
+        break;
+      case "6":
+        weekStr = "56";
+        break;
+      case "7":
+        weekStr = "67";
+        break;
+    }
+    return weekStr;
   }
 
   private void setTomorrowStrategyZero(Tomorrow tomorrow) {
@@ -123,8 +165,12 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     String tTitle = "{checkSwitch:true,type:0,settings:[{switch:true,";
     stringBuilder.append(tTitle);
     stringBuilder.append(getWakeupTimeStr(tomorrow.on_hour, tomorrow.on_minute));
+    stringBuilder.append(",");
     stringBuilder.append(getSleepTimeStr(tomorrow.off_hour, tomorrow.off_minute));
+    stringBuilder.append(",");
     stringBuilder.append(getWeekRepeatStr(tomorrow.week));
+    stringBuilder.append("}]}");
+
 
     Intent powerOnOffTimerIntent = new Intent("com.zhsd.setting.POWER_ON_OFF_TIMER");
     powerOnOffTimerIntent.putExtra("data", stringBuilder.toString());
@@ -221,7 +267,6 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       String on_minute = "0";
       String off_hour = "0";
       String off_minute = "0";
-      String week = DateUtil.getWeek(strategy.weeks);
       String[] onTime = getTime(strategy.on_time);
       if (null != onTime) {
         on_hour = TextUtils.equals(onTime[0].substring(0, 1), "0") ? onTime[0].substring(1, 2) : onTime[0].substring(0, 2);
@@ -237,7 +282,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       tomorrow.on_minute = DateUtil.toInt(on_minute);
       tomorrow.off_hour = DateUtil.toInt(off_hour);
       tomorrow.off_minute = DateUtil.toInt(off_minute);
-      tomorrow.week = week;
+      tomorrow.week = strategy.weeks;
 
       setTomorrowStrategyZero(tomorrow);
     }
@@ -245,7 +290,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
 
   private void resetStrategyZero() {
     Intent powerOnOffTimerIntent = new Intent("com.zhsd.setting.POWER_ON_OFF_TIMER");
-    powerOnOffTimerIntent.putExtra("data", "{checkSwitch:true,type:0,settings:[]}");
+    powerOnOffTimerIntent.putExtra("data", "{checkSwitch:false,type:0,settings:[]}");
     powerOnOffTimerIntent.putExtra("owner", "0");
     sendBroadcast(powerOnOffTimerIntent);
   }
@@ -320,11 +365,11 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     List<Strategy> todayNormalStrategyList = KJDB.getDefaultInstance().findAllByWhere(Strategy.class, todayWhereStr);
     if (null != todayTempStrategyList && todayTempStrategyList.size() > 0) {
       Strategy strategy = todayTempStrategyList.get(0);
-      todayEndDate = DateUtil.getTodayDate() + " " + strategy.end_date.split(" ")[1];
+      todayEndDate = DateUtil.getTodayDate() + " " + strategy.off_time.split(" ")[1];
     } else if (null != todayNormalStrategyList && todayNormalStrategyList.size() > 0) {
       //常规策略
       Strategy strategy = todayNormalStrategyList.get(0);
-      todayEndDate = DateUtil.getTodayDate() + " " + strategy.end_date.split(" ")[1];
+      todayEndDate = DateUtil.getTodayDate() + " " + strategy.off_time.split(" ")[1];
     } else {
       todayEndDate = DateUtil.getTodayDate() + " 18:00:00";
     }
@@ -523,11 +568,11 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     List<Strategy> normalStrategyList = KJDB.getDefaultInstance().findAllByWhere(Strategy.class, whereStr);
     if (null != tempStrategyList && tempStrategyList.size() > 0) {
       Strategy strategy = tempStrategyList.get(0);
-      tomorrowStartDate = DateUtil.getNextDate() + " " + strategy.end_date.split(" ")[1];
+      tomorrowStartDate = DateUtil.getNextDate() + " " + strategy.on_time.split(" ")[1];
     } else if (null != normalStrategyList && normalStrategyList.size() > 0) {
       //常规策略
       Strategy strategy = normalStrategyList.get(0);
-      todayEndDate = DateUtil.getTodayDate() + " " + strategy.end_date.split(" ")[1];
+      tomorrowStartDate = DateUtil.getTodayDate() + " " + strategy.on_time.split(" ")[1];
     } else {
       //无匹配策略
       tomorrowStartDate = "";

@@ -351,6 +351,8 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     setTodayOffLineStrategy();
 
     setTomorrowOffLineStrategy();
+
+    syncOneSecondFifteen();
   }
 
   /**
@@ -411,6 +413,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       KJDB.getDefaultInstance().deleteByWhere(Strategy.class, "1==1");
       KJDB.getDefaultInstance().save(rsp.bootModel.strategy);
     }
+    syncOneSecondFifteen();
   }
 
   private void setTodayStrategy(BootModel bootModel) {
@@ -524,6 +527,41 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     Intent intent = new Intent("com.hra.setShutdownWeek");
     intent.putExtra("key", "0000000");
     sendBroadcast(intent);
+  }
+
+  /**
+   * 关机
+   */
+  private void shutdownStrategy() {
+    Intent intent = new Intent("com.hra.shutdown");
+    sendBroadcast(intent);
+  }
+
+
+  /**
+   * 时间检测 定时器 1s一次
+   */
+  private void syncOneSecondFifteen() {
+    Subscription syncOneSecondFour = Observable.timer(1, TimeUnit.SECONDS)
+            .subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<Long>() {
+              @Override
+              public void call(Long aLong) {
+                if (TextUtils.isEmpty(todayEndDate)) {
+                  syncOneSecondFifteen();
+                  return;
+                }
+                long todayEndDateTimeStamp = DateUtil.getTimeStamp(todayEndDate);
+                if (System.currentTimeMillis() / 1000 >= todayEndDateTimeStamp) {
+                  shutdownStrategy();
+                } else {
+                  //时间未到
+                  syncOneSecondFifteen();
+                }
+              }
+            });
+    addRxSubscription(syncOneSecondFour);
   }
 
 

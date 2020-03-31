@@ -86,6 +86,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         //教师考勤
         setOffLineStrategyFifteen();
         break;
+      case 16:
+        //新班牌
+        setOffLineStrategyFifteen();
+        break;
     }
   }
 
@@ -99,6 +103,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     SPUtils.getInstance(this).put("device_type", bootModel.device_type);
     switch (bootModel.device_type) {
       case 0:
+        //老班牌
         setStrategyZero(rsp);
         break;
       case 4:
@@ -108,6 +113,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       case 15:
         //教师考勤
         setStrategyFifteen(rsp);
+        break;
+      case 16:
+        //新班牌
+        setOffLineStrategyFifteen();
         break;
     }
   }

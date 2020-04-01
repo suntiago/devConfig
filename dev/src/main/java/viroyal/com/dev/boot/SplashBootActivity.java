@@ -76,7 +76,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     int device_type = null == bootModel ? SPUtils.getInstance(this).get("device_type", 0) : bootModel.device_type;
     switch (device_type) {
       case 0:
+        //老班牌
         setOffLineStrategyZero();
+        //新班牌
+        setOffLineStrategyFifteen();
         break;
       case 4:
         //大屏
@@ -84,10 +87,6 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         break;
       case 15:
         //教师考勤
-        setOffLineStrategyFifteen();
-        break;
-      case 16:
-        //新班牌
         setOffLineStrategyFifteen();
         break;
     }
@@ -105,6 +104,8 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       case 0:
         //老班牌
         setStrategyZero(rsp);
+        //新班牌
+        setOffLineStrategyFifteen();
         break;
       case 4:
         //大屏
@@ -113,10 +114,6 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       case 15:
         //教师考勤
         setStrategyFifteen(rsp);
-        break;
-      case 16:
-        //新班牌
-        setOffLineStrategyFifteen();
         break;
     }
   }

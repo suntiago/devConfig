@@ -77,7 +77,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     switch (device_type) {
       case 0:
         //老班牌
-        setOffLineStrategyZero();
+//        setOffLineStrategyZero();
         //新班牌
         setOffLineStrategyFifteen();
         break;
@@ -103,7 +103,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
     switch (bootModel.device_type) {
       case 0:
         //老班牌
-        setStrategyZero(rsp);
+//        setStrategyZero(rsp);
         //新班牌
         setOffLineStrategyFifteen();
         break;

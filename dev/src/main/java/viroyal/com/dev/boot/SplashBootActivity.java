@@ -105,7 +105,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         //老班牌
 //        setStrategyZero(rsp);
         //新班牌
-        setOffLineStrategyFifteen();
+        setStrategyFifteen(rsp);
         break;
       case 4:
         //大屏

@@ -55,11 +55,11 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
             .subscribe(new BaseRspObserver<>(BootResponse.class, new Action1<BootResponse>() {
               @Override
               public void call(BootResponse rsp) {
-                if (rsp.error_code == 1001 || rsp.error_code < 0) {
+                if (rsp.error_code == 1000) {
                   //请求失败 无网络 数据解析失败等读取本地缓存数据
-                  chooseOffLineStrategy(rsp);
-                } else {
                   chooseStrategy(rsp);
+                } else {
+                  chooseOffLineStrategy(rsp);
                 }
               }
             }));

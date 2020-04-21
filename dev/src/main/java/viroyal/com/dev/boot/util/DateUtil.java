@@ -19,7 +19,7 @@ public class DateUtil {
   public static String getWeek(String week) {
     StringBuilder stringBuilder = new StringBuilder();
     if (TextUtils.isEmpty(week)) {
-      stringBuilder.append("0000000");
+      stringBuilder.append("1111111");
       return stringBuilder.toString();
     }
     if (week.contains("7")) {

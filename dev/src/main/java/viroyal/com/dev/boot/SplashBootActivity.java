@@ -456,7 +456,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       tomorrow.off_minute = DateUtil.toInt(off_minute);
       tomorrow.week = week;
 
-      setTomorrowStrategyFifteen(tomorrow);
+      setTomorrowOffLineStrategyFifteen(tomorrow);
     }
   }
 
@@ -481,6 +481,43 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
    * @param tomorrow
    */
   private void setTomorrowStrategyFifteen(Tomorrow tomorrow) {
+    //false - 关闭自动开机 true - 开启自动开机
+    Intent autoBootIntent = new Intent("com.hra.setAutoBoot");
+    autoBootIntent.putExtra("key", true);
+    sendBroadcast(autoBootIntent);
+    //开机时间
+    Intent bootIntent = new Intent("com.hra.setBootTime");
+    bootIntent.putExtra("hourOfDay", tomorrow.on_hour);
+    bootIntent.putExtra("minute", tomorrow.on_minute);
+    sendBroadcast(bootIntent);
+
+    //false - 关闭自动关机 true - 开启自动关机
+    Intent autoShutdownIntent = new Intent("com.hra.setAutoShutdown");
+    autoShutdownIntent.putExtra("key", true);
+    sendBroadcast(autoShutdownIntent);
+
+    //关机时间
+    Intent shutdownIntent = new Intent("com.hra.setShutdownTime");
+    shutdownIntent.putExtra("hourOfDay", tomorrow.off_hour);
+    shutdownIntent.putExtra("minute", tomorrow.off_minute);
+    sendBroadcast(shutdownIntent);
+
+    //星期周期
+    Intent bootWeekIntent = new Intent("com.hra.setBootWeek");
+    bootWeekIntent.putExtra("key",  DateUtil.getWeek(tomorrow.week));
+    sendBroadcast(bootWeekIntent);
+
+    Intent shutdownWeekIntent = new Intent("com.hra.setShutdownWeek");
+    shutdownWeekIntent.putExtra("key",  DateUtil.getWeek(tomorrow.week));
+    sendBroadcast(shutdownWeekIntent);
+  }
+
+  /**
+   * 离线设置策略15
+   *
+   * @param tomorrow
+   */
+  private void setTomorrowOffLineStrategyFifteen(Tomorrow tomorrow) {
     //false - 关闭自动开机 true - 开启自动开机
     Intent autoBootIntent = new Intent("com.hra.setAutoBoot");
     autoBootIntent.putExtra("key", true);

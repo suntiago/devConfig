@@ -504,11 +504,11 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
 
     //星期周期
     Intent bootWeekIntent = new Intent("com.hra.setBootWeek");
-    bootWeekIntent.putExtra("key", DateUtil.getWeek(tomorrow.week));
+    bootWeekIntent.putExtra("key", tomorrow.week);
     sendBroadcast(bootWeekIntent);
 
     Intent shutdownWeekIntent = new Intent("com.hra.setShutdownWeek");
-    shutdownWeekIntent.putExtra("key", DateUtil.getWeek(tomorrow.week));
+    shutdownWeekIntent.putExtra("key", tomorrow.week);
     sendBroadcast(shutdownWeekIntent);
   }
 

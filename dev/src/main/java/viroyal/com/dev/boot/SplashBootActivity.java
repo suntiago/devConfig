@@ -58,12 +58,41 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
                 if (rsp.error_code == 1000) {
                   //请求失败 无网络 数据解析失败等读取本地缓存数据
                   chooseStrategy(rsp);
-                } else {
+                } else if (rsp.error_code == 1009 || rsp.error_code == 1010){
+                  //本地策略
                   chooseOffLineStrategy(rsp);
+                } else {
+                  //无策略
+                  chooseNoStrategy(rsp);
                 }
               }
             }));
     addRxSubscription(bootSubscription);
+  }
+
+  /**
+   * 无策略，关闭定时开关机
+   * @param rsp
+   */
+  private void chooseNoStrategy(BootResponse rsp) {
+    BootModel bootModel = rsp.bootModel;
+    int device_type = null == bootModel ? SPUtils.getInstance(this).get("device_type", 0) : bootModel.device_type;
+    switch (device_type) {
+      case 0:
+        //老班牌
+//        setOffLineStrategyZero();
+        //新班牌
+        resetStrategyFifteen();
+        break;
+      case 4:
+        //大屏无关闭重置定时开关机，让其执行离线策略
+        setOffLineStrategyFour();
+        break;
+      case 15:
+        //教师考勤
+        resetStrategyFifteen();
+        break;
+    }
   }
 
   /**

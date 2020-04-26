@@ -58,7 +58,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
                 if (rsp.error_code == 1000) {
                   //请求失败 无网络 数据解析失败等读取本地缓存数据
                   chooseStrategy(rsp);
-                } else if (rsp.error_code == 1009 || rsp.error_code == 1010){
+                } else if (rsp.error_code == 1009 || rsp.error_code == 1010 || rsp.error_code == -99){
                   //本地策略
                   chooseOffLineStrategy(rsp);
                 } else {

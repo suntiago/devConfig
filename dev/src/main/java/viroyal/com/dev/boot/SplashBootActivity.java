@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.suntiago.baseui.activity.base.AppDelegateBase;
 import com.suntiago.baseui.activity.base.theMvp.model.IModel;
+import com.suntiago.baseui.utils.NetUtils;
 import com.suntiago.baseui.utils.SPUtils;
 import com.suntiago.network.network.Api;
 import com.suntiago.network.network.BaseRspObserver;
@@ -46,28 +47,34 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
    * 获取开关机策略
    */
   protected void getBootConfig() {
-    BootRequest bootRequest = new BootRequest();
-    bootRequest.IMEI = DeviceInfoUtil.getInstance(SplashBootActivity.this).getDeviceUuid();
-    Subscription bootSubscription = Api.get().getApi(BootConfig.class, getBootHostApi())
-            .bootApi(bootRequest)
-            .subscribeOn(Schedulers.newThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new BaseRspObserver<>(BootResponse.class, new Action1<BootResponse>() {
-              @Override
-              public void call(BootResponse rsp) {
-                if (rsp.error_code == 1000) {
-                  //请求失败 无网络 数据解析失败等读取本地缓存数据
-                  chooseStrategy(rsp);
-                } else if (rsp.error_code == 1009 || rsp.error_code == 1010 || rsp.error_code == -99){
-                  //本地策略
-                  chooseOffLineStrategy(rsp);
-                } else {
-                  //无策略
-                  chooseNoStrategy(rsp);
-                }
+    if (NetUtils.isConnected(this)) {
+      BootRequest bootRequest = new BootRequest();
+      bootRequest.IMEI = DeviceInfoUtil.getInstance(SplashBootActivity.this).getDeviceUuid();
+      Subscription bootSubscription = Api.get().getApi(BootConfig.class, getBootHostApi())
+          .bootApi(bootRequest)
+          .subscribeOn(Schedulers.newThread())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(new BaseRspObserver<>(BootResponse.class, new Action1<BootResponse>() {
+            @Override
+            public void call(BootResponse rsp) {
+              if (rsp.error_code == 1000) {
+                //请求失败 无网络 数据解析失败等读取本地缓存数据
+                chooseStrategy(rsp);
+              } else if (rsp.error_code == 1009 || rsp.error_code == 1010 || rsp.error_code == -99){
+                //本地策略
+                chooseOffLineStrategy(rsp);
+              } else {
+                //无策略
+                chooseNoStrategy(rsp);
               }
-            }));
-    addRxSubscription(bootSubscription);
+            }
+          }));
+      addRxSubscription(bootSubscription);
+    } else {
+      BootResponse rsp = new BootResponse();
+      rsp.bootModel = null;
+      chooseOffLineStrategy(rsp);
+    }
   }
 
   /**

@@ -47,7 +47,6 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
    * 获取开关机策略
    */
   protected void getBootConfig() {
-    if (NetUtils.isConnected(this)) {
       BootRequest bootRequest = new BootRequest();
       bootRequest.IMEI = DeviceInfoUtil.getInstance(SplashBootActivity.this).getDeviceUuid();
       Subscription bootSubscription = Api.get().getApi(BootConfig.class, getBootHostApi())
@@ -58,9 +57,9 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
             @Override
             public void call(BootResponse rsp) {
               if (rsp.error_code == 1000) {
-                //请求失败 无网络 数据解析失败等读取本地缓存数据
                 chooseStrategy(rsp);
-              } else if (rsp.error_code == 1009 || rsp.error_code == 1010 || rsp.error_code == -99){
+                //请求失败 无网络 数据解析失败等读取本地缓存数据
+              } else if (rsp.error_code == 1009 || rsp.error_code == 1010 || rsp.error_code == 1001 || rsp.error_code < 0){
                 //本地策略
                 chooseOffLineStrategy(rsp);
               } else {
@@ -70,11 +69,6 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
             }
           }));
       addRxSubscription(bootSubscription);
-    } else {
-      BootResponse rsp = new BootResponse();
-      rsp.bootModel = null;
-      chooseOffLineStrategy(rsp);
-    }
   }
 
   /**
@@ -355,7 +349,8 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
                   syncOneSecond();
                   return;
                 }
-                if (System.currentTimeMillis() / 1000 + 5 * 60 >= DateUtil.getTimeStamp(todayEndDate)) {
+                //关机10分钟前拉一次开关机策略
+                if (System.currentTimeMillis() / 1000 + 10 * 60 >= DateUtil.getTimeStamp(todayEndDate)) {
                   syncOneMin();
                 } else {
                   //时间未到
@@ -377,7 +372,8 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
             .subscribe(new Action1<Long>() {
               @Override
               public void call(Long aLong) {
-                if (System.currentTimeMillis() / 1000 < DateUtil.getTimeStamp(todayEndDate)) {
+                //关机前5分钟，每隔一分钟拉一次开关机策略
+                if ( System.currentTimeMillis() / 1000 + 5 * 60 <= DateUtil.getTimeStamp(todayEndDate)) {
                   syncOneMin();
                 }
               }
@@ -618,10 +614,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
 
 
   /**
-   * 时间检测 定时器 1s一次
+   * 时间检测 定时器 1m一次
    */
   private void syncOneSecondFifteen() {
-    Subscription syncOneSecondFour = Observable.timer(1, TimeUnit.SECONDS)
+    Subscription syncOneSecondFour = Observable.timer(1, TimeUnit.MINUTES)
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<Long>() {

@@ -47,6 +47,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    compile 'com.github.suntiago:baseui:cbc6abb39b'
+    compile 'com.github.suntiago:baseui:641d4e05cf'
     implementation 'com.tencent:mmkv:1.0.19'
 }

@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import viroyal.com.dev.R;
+import viroyal.com.dev.util.HandleSSLHandshakeUtil;
 
 /**
  * Created by zy on 2019/1/29.
@@ -196,6 +197,7 @@ public class BroadcastView extends FrameLayout {
     mDataWatcher = new DataWatcher() {
       @Override
       public void onDataChanged(DownloadEntry data) {
+        HandleSSLHandshakeUtil.handleSSLHandshake();
         Slog.d(TAG, "onDataChanged  [data]:" + "正在下载" + data.percent + "%");
         if (data.percent == 100 && !TextUtils.isEmpty(data.loc_path)) {
           List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
@@ -661,6 +663,7 @@ public class BroadcastView extends FrameLayout {
   }
 
   private void checkDownload() {
+    HandleSSLHandshakeUtil.handleSSLHandshake();
     List<BroadcastData> list = KJDB.getDefaultInstance().findAllByWhere(BroadcastData.class,
         "contentGappercent = " + mIndexID + "");
     boolean tagneedTodown = false;
@@ -704,6 +707,7 @@ public class BroadcastView extends FrameLayout {
 
   //开始下载
   private void startDownload(String url) {
+    HandleSSLHandshakeUtil.handleSSLHandshake();
     DownloadEntry entry;
     if (dataChanger.containsDownloadEntry(url)) {
       entry = dataChanger.queryDownloadEntryByUrl(url);

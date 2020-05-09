@@ -7,7 +7,6 @@ import android.text.TextUtils;
 
 import com.suntiago.baseui.activity.base.AppDelegateBase;
 import com.suntiago.baseui.activity.base.theMvp.model.IModel;
-import com.suntiago.baseui.utils.NetUtils;
 import com.suntiago.baseui.utils.SPUtils;
 import com.suntiago.network.network.Api;
 import com.suntiago.network.network.BaseRspObserver;
@@ -36,6 +35,7 @@ import viroyal.com.dev.util.DeviceInfoUtil;
 public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IModel> extends NFCMonitorBaseActivity<T, D> {
   private String todayEndDate;
   private String tomorrowStartDate;
+  private String tomorrowEndDate;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,7 +91,7 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         break;
       case 15:
         //教师考勤
-        resetStrategyFifteen();
+        resetStrategyFifteenOld();
         break;
     }
   }
@@ -117,10 +117,11 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         break;
       case 15:
         //教师考勤
-        setOffLineStrategyFifteen();
+        setOffLineStrategyFifteenOld();
         break;
     }
   }
+
 
   /**
    * 选择在线模式
@@ -143,10 +144,171 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         break;
       case 15:
         //教师考勤
-        setStrategyFifteen(rsp);
+        setStrategyFifteenOld(rsp);
         break;
     }
   }
+
+  /*-----------------------------------------策略十五开始(广州厂商机器)------------------------------------------------*/
+  private void setStrategyFifteenOld(BootResponse rsp) {
+    BootModel bootModel = rsp.bootModel;
+    setTodayStrategy(bootModel);
+    //成功
+    Tomorrow tomorrow = bootModel.tomorrow;
+    if (null != tomorrow) {
+      setTomorrowStrategyFifteenOld(tomorrow);
+    } else {
+      //说明明天无策略
+      resetStrategyFifteenOld();
+    }
+    //保存开机策略
+    if (null != bootModel.strategy) {
+      KJDB.getDefaultInstance().deleteByWhere(Strategy.class, "1==1");
+      KJDB.getDefaultInstance().save(rsp.bootModel.strategy);
+    }
+    syncOneSecondFifteenOld();
+  }
+
+  /**
+   * 这个机器的策略：关机时间必须要早于开机时间，所以只能关机时间为当日关机时间，开机时间为明日的开机时间
+   * 参数为时间戳 毫秒级
+   * @param tomorrow
+   */
+  private void setTomorrowStrategyFifteenOld(Tomorrow tomorrow) {
+    tomorrowStartDate = DateUtil.getNextDate() + " " + DateUtil.getTime(tomorrow.on_hour, tomorrow.on_minute);
+    tomorrowEndDate = DateUtil.getNextDate() + " " + DateUtil.getTime(tomorrow.off_hour, tomorrow.off_minute);
+    long todayEndDateTimeStamp = DateUtil.getTimeStamp(todayEndDate);
+      if (!TextUtils.isEmpty(tomorrowStartDate) && !TextUtils.isEmpty(tomorrowEndDate)) {
+        long tomorrowStartDateTimeStamp = DateUtil.getTimeStamp(tomorrowStartDate);
+//        long tomorrowEndDateTimeStamp = DateUtil.getTimeStamp(tomorrowEndDate);
+        Bundle bundle = new Bundle();
+//        long closeTime = System.currentTimeMillis()+60*10*1000;//表示当前时间后10分钟关机
+//        long openTime = closeTime +60*10*1000;//表示关机后，10分钟开机
+        //关机时间 是当天的关机时间
+        bundle.putString("timeOff",(todayEndDateTimeStamp * 1000) +"");
+//        bundle.putString("timeOff",(tomorrowEndDateTimeStamp * 1000) +"");
+        //开机时间
+        bundle.putString("timeOn",(tomorrowStartDateTimeStamp * 1000) +"");
+        //1启用，0不启用
+        bundle.putString("enable",1 +"");
+        Intent intent = new Intent("com.vsservice.TIMING");
+        intent.putExtras(bundle);
+        sendBroadcast(intent);
+      }
+  }
+
+  /**
+   * 离线
+   */
+  private void setOffLineStrategyFifteenOld() {
+    setTodayOffLineStrategy();
+
+    setTomorrowOffLineStrategyOld();
+
+    syncOneSecondFifteenOld();
+  }
+
+
+  private void setTomorrowOffLineStrategyOld() {
+    String nextDate = DateUtil.getNextDate() + " 00:00:00";
+    String tempWhereStr = "type='2' and '" + nextDate + "' between start_date and end_date";
+    String whereStr = "type='1' and '" + nextDate + "' between start_date and end_date";
+    List<Strategy> tempStrategyList = KJDB.getDefaultInstance().findAllByWhere(Strategy.class, tempWhereStr);
+    List<Strategy> normalStrategyList = KJDB.getDefaultInstance().findAllByWhere(Strategy.class, whereStr);
+    if (null != tempStrategyList && tempStrategyList.size() > 0) {
+      //临时策略
+      setTomorrowOffLineStrategyFifteenOld(tempStrategyList);
+      return;
+    }
+    if (null != normalStrategyList && normalStrategyList.size() > 0) {
+      //常规策略
+      setTomorrowOffLineStrategyFifteenOld(normalStrategyList);
+      return;
+    }
+    //无匹配策略
+    resetStrategyFifteenOld();
+  }
+
+  private void setTomorrowOffLineStrategyFifteenOld(List<Strategy> strategyList) {
+    if (strategyList.size() > 0) {
+      Strategy strategy = strategyList.get(0);
+      String on_hour = "0";
+      String on_minute = "0";
+      String off_hour = "0";
+      String off_minute = "0";
+      String week = DateUtil.getWeek(strategy.weeks);
+      String[] onTime = getTime(strategy.on_time);
+      if (null != onTime) {
+        on_hour = TextUtils.equals(onTime[0].substring(0, 1), "0") ? onTime[0].substring(1, 2) : onTime[0].substring(0, 2);
+        on_minute = TextUtils.equals(onTime[1].substring(0, 1), "0") ? onTime[1].substring(1, 2) : onTime[1].substring(0, 2);
+      }
+      String[] offTime = getTime(strategy.off_time);
+      if (null != offTime) {
+        off_hour = TextUtils.equals(offTime[0].substring(0, 1), "0") ? offTime[0].substring(1, 2) : offTime[0].substring(0, 2);
+        off_minute = TextUtils.equals(offTime[1].substring(0, 1), "0") ? offTime[1].substring(1, 2) : offTime[1].substring(0, 2);
+      }
+      Tomorrow tomorrow = new Tomorrow();
+      tomorrow.on_hour = DateUtil.toInt(on_hour);
+      tomorrow.on_minute = DateUtil.toInt(on_minute);
+      tomorrow.off_hour = DateUtil.toInt(off_hour);
+      tomorrow.off_minute = DateUtil.toInt(off_minute);
+      tomorrow.week = week;
+
+      setTomorrowStrategyFifteenOld(tomorrow);
+    }
+  }
+
+  /**
+   * 重置策略
+   */
+  private void resetStrategyFifteenOld() {
+    Bundle bundle = new Bundle();
+//        long closeTime = System.currentTimeMillis()+60*10*1000;//表示当前时间后10分钟关机
+//        long openTime = closeTime +60*10*1000;//表示关机后，10分钟开机
+    //关机时间
+    bundle.putString("timeOff",0 +"");
+    //开机时间
+    bundle.putString("timeOn",0 +"");
+    //1启用，0不启用
+    bundle.putString("enable",0 +"");
+    Intent intent = new Intent("com.vsservice.TIMING");
+    intent.putExtras(bundle);
+    sendBroadcast(intent);
+  }
+
+
+
+  /**
+   * 时间检测 定时器 1m一次
+   */
+  private void syncOneSecondFifteenOld() {
+    Subscription syncOneSecondFour = Observable.timer(1, TimeUnit.MINUTES)
+        .subscribeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(aLong -> {
+          if (TextUtils.isEmpty(todayEndDate)) {
+            syncOneSecondFifteenOld();
+            return;
+          }
+          long todayEndDateTimeStamp = DateUtil.getTimeStamp(todayEndDate);
+          if (System.currentTimeMillis() / 1000 >= todayEndDateTimeStamp) {
+            shutdownStrategyOld();
+          } else {
+            //时间未到
+            syncOneSecondFifteenOld();
+          }
+        });
+    addRxSubscription(syncOneSecondFour);
+  }
+
+  /**
+   * 关机
+   */
+  private void shutdownStrategyOld() {
+    Intent intent = new Intent("wits.com.simahuan.shutdown");
+    sendBroadcast(intent);
+  }
+  /*-----------------------------------------策略十五结束广州厂商机器)------------------------------------------------*/
 
   /*-----------------------------------------策略零开始------------------------------------------------*/
 

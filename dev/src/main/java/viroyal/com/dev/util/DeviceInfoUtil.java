@@ -119,8 +119,13 @@ public class DeviceInfoUtil {
   }
 
   public String getDeviceUuid() {
-    return uuid.toString();
+    String serialNumber = android.os.Build.SERIAL;
+    return serialNumber;
   }
+
+//  public String getDeviceUuid() {
+//    return uuid.toString();
+//  }
 
   private static void saveToSD(String uuid, String fileName) {
     String dirPath = Environment.getExternalStorageDirectory().getAbsolutePath();

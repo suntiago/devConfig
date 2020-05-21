@@ -93,6 +93,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         //教师考勤
         resetStrategyFifteenOld();
         break;
+      case 16:
+        //会议室
+        resetStrategyFifteenOld();
+        break;
     }
   }
 
@@ -117,6 +121,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         break;
       case 15:
         //教师考勤
+        setOffLineStrategyFifteenOld();
+        break;
+      case 16:
+        //会议室
         setOffLineStrategyFifteenOld();
         break;
     }
@@ -144,6 +152,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         break;
       case 15:
         //教师考勤
+        setStrategyFifteenOld(rsp);
+        break;
+      case 16:
+        //会议室
         setStrategyFifteenOld(rsp);
         break;
     }

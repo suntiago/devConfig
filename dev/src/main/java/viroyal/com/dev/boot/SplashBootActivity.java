@@ -97,6 +97,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
         //会议室
         resetStrategyFifteenOld();
         break;
+      case 17:
+        //大屏无关闭重置定时开关机，让其执行离线策略
+        setOffLineStrategyFour();
+        break;
     }
   }
 
@@ -126,6 +130,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       case 16:
         //会议室
         setOffLineStrategyFifteenOld();
+        break;
+      case 17:
+        //校园超脑屏幕
+        setOffLineStrategyFour();
         break;
     }
   }
@@ -157,6 +165,10 @@ public abstract class SplashBootActivity<T extends AppDelegateBase, D extends IM
       case 16:
         //会议室
         setStrategyFifteenOld(rsp);
+        break;
+      case 17:
+        //校园超脑屏幕
+        setStrategyFour(rsp);
         break;
     }
   }

@@ -10,12 +10,14 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 public class DeviceInfoUtil {
@@ -30,8 +32,9 @@ public class DeviceInfoUtil {
   private static String imei;
 
   private static DeviceInfoUtil deviceUuidFactory;
-  public static DeviceInfoUtil getInstance(Context context){
-    if (deviceUuidFactory == null){
+
+  public static DeviceInfoUtil getInstance(Context context) {
+    if (deviceUuidFactory == null) {
       deviceUuidFactory = new DeviceInfoUtil(context);
     }
     return deviceUuidFactory;
@@ -119,8 +122,43 @@ public class DeviceInfoUtil {
   }
 
   public String getDeviceUuid() {
-    String serialNumber = android.os.Build.SERIAL;
-    return serialNumber;
+    StringBuilder sb = new StringBuilder();
+
+    File file = new File(Environment.getExternalStorageDirectory() + File.separator + "viroyal_mac.txt");
+    //打开文件输入流
+    FileInputStream inputStream = null;
+    try {
+      inputStream = new FileInputStream(file);
+      byte[] buffer = new byte[1024];
+      int len = inputStream.read(buffer);
+      //读取文件内容
+      while (len > 0) {
+        sb.append(new String(buffer, 0, len));
+
+        //继续将数据放到buffer中
+        len = inputStream.read(buffer);
+      }
+      //关闭输入流
+      inputStream.close();
+
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    if (sb.toString().isEmpty()) {
+      String imei = "";
+      try {
+        SHA1Utils sha1Utils = new SHA1Utils();
+        imei = new SHA1Utils().hexString(sha1Utils.eccryptSHA1(android.os.Build.SERIAL)).substring(0, 36);
+      } catch (NoSuchAlgorithmException e) {
+        e.printStackTrace();
+      }
+      return imei;
+    } else {
+      return sb.toString();
+    }
   }
 
 //  public String getDeviceUuid() {
